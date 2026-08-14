@@ -8,6 +8,8 @@ Phase 0 — Project Foundation. Backend and frontend skeletons are running with 
 
 Phase 1 — Authentication. Users can register, log in, and access protected routes with a JWT bearer token. Backend exposes `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, and `GET /api/v1/auth/me`. Frontend has login/register pages and a protected home page backed by a React auth context.
 
+Phase 2 — User & Academic Profile. Every user has an academic profile (full name, academic level, institution, program, subjects, academic goals) created automatically on first access. Backend exposes `GET /api/v1/profile/me` and `PATCH /api/v1/profile/me`. Frontend has an editable profile page linked from the home page.
+
 ## Tech Stack
 
 **Frontend:** React, TypeScript, Vite, Material UI, React Router, Axios, Recharts

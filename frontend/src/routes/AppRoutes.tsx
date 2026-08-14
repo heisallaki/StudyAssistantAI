@@ -3,6 +3,7 @@ import ProtectedRoute from '../components/common/ProtectedRoute'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import HomePage from '../pages/HomePage'
+import ProfilePage from '../pages/ProfilePage'
 
 function AppRoutes() {
   return (
@@ -14,6 +15,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

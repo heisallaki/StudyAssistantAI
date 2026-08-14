@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
 import { Box, Button, Card, CardContent, Chip, CircularProgress, Container, Typography } from '@mui/material'
 import apiClient from '../services/api'
 import { useAuth } from '../hooks/useAuth'
@@ -53,9 +54,14 @@ function HomePage() {
             <Typography variant="subtitle1" gutterBottom>
               Welcome, {user?.email}
             </Typography>
-            <Button variant="outlined" color="secondary" onClick={logout} sx={{ mb: 2 }}>
-              Log out
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+              <Button variant="outlined" color="secondary" onClick={logout}>
+                Log out
+              </Button>
+              <Button variant="outlined" component={RouterLink} to="/profile">
+                Edit profile
+              </Button>
+            </Box>
             <Typography variant="subtitle2" gutterBottom>
               System Status
             </Typography>
