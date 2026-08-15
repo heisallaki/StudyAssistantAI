@@ -2,8 +2,8 @@ import { Route, Routes } from 'react-router-dom'
 import ProtectedRoute from '../components/common/ProtectedRoute'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
-import HomePage from '../pages/HomePage'
-import ProfilePage from '../pages/ProfilePage'
+import DashboardPage from '../pages/dashboard/DashboardPage'
+import ProfilePage from '../pages/profile/ProfilePage'
 
 function AppRoutes() {
   return (
@@ -14,7 +14,7 @@ function AppRoutes() {
         path="/"
         element={
           <ProtectedRoute>
-            <HomePage />
+            <DashboardPage />
           </ProtectedRoute>
         }
       />

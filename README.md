@@ -10,6 +10,8 @@ Phase 1 — Authentication. Users can register, log in, and access protected rou
 
 Phase 2 — User & Academic Profile. Every user has an academic profile (full name, academic level, institution, program, subjects, academic goals) created automatically on first access. Backend exposes `GET /api/v1/profile/me` and `PATCH /api/v1/profile/me`. Frontend has an editable profile page linked from the home page.
 
+Phase 3 — Dashboard. The authenticated landing page is a real dashboard showing profile completion (computed server-side), quick actions, and honest empty states for recent activity, upcoming sessions, and weak areas — those sections will populate once quizzes, study sessions, and analytics exist in later phases.
+
 ## Tech Stack
 
 **Frontend:** React, TypeScript, Vite, Material UI, React Router, Axios, Recharts
