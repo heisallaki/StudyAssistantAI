@@ -12,3 +12,11 @@ class InvalidCredentialsError(AppError):
 
 class InactiveUserError(AppError):
     pass
+
+
+class SubjectNotFoundError(AppError):
+    pass
+
+
+class TopicNotFoundError(AppError):
+    pass

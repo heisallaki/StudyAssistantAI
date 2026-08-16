@@ -12,6 +12,8 @@ Phase 2 — User & Academic Profile. Every user has an academic profile (full na
 
 Phase 3 — Dashboard. The authenticated landing page is a real dashboard showing profile completion (computed server-side), quick actions, and honest empty states for recent activity, upcoming sessions, and weak areas — those sections will populate once quizzes, study sessions, and analytics exist in later phases.
 
+Phase 4 — Subjects & Courses. Users can create, edit, and delete subjects, add and remove topics within each subject, and mark topics complete. Progress percentage is computed server-side from real completion state. Ownership is enforced on every subject/topic endpoint — a user can never see or modify another user's data. Navigation is now a shared top bar (Dashboard / Subjects / Profile) rather than per-page links.
+
 ## Tech Stack
 
 **Frontend:** React, TypeScript, Vite, Material UI, React Router, Axios, Recharts

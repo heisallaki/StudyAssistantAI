@@ -1,9 +1,8 @@
-import type { ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 import { useAuth } from '../../hooks/useAuth'
 
-function ProtectedRoute({ children }: { children: ReactNode }) {
+function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
@@ -18,7 +17,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
     return <Navigate to="/login" replace />
   }
 
-  return <>{children}</>
+  return <Outlet />
 }
 
 export default ProtectedRoute

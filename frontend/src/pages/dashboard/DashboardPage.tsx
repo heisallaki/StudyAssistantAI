@@ -26,7 +26,7 @@ const FIELD_LABELS: Record<string, string> = {
 }
 
 function DashboardPage() {
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -41,7 +41,7 @@ function DashboardPage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
       </Box>
     )
@@ -50,24 +50,19 @@ function DashboardPage() {
   return (
     <Container maxWidth="md">
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-              Welcome back, {user?.email}
+        <Box>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
+            Welcome back, {user?.email}
+          </Typography>
+          {overview && (
+            <Typography variant="body2" color="text.secondary">
+              Member since {new Date(overview.member_since).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </Typography>
-            {overview && (
-              <Typography variant="body2" color="text.secondary">
-                Member since {new Date(overview.member_since).toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </Typography>
-            )}
-          </Box>
-          <Button variant="outlined" color="secondary" onClick={logout}>
-            Log out
-          </Button>
+          )}
         </Box>
 
         {error && <Alert severity="error">{error}</Alert>}
@@ -116,6 +111,9 @@ function DashboardPage() {
               Quick Actions
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Button variant="outlined" component={RouterLink} to="/subjects">
+                Manage subjects
+              </Button>
               <Button variant="outlined" component={RouterLink} to="/profile">
                 Edit profile
               </Button>

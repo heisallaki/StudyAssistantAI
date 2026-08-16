@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
 import {
   Alert,
   Autocomplete,
@@ -10,7 +9,6 @@ import {
   CardContent,
   CircularProgress,
   Container,
-  Link,
   MenuItem,
   TextField,
   Typography,
@@ -83,7 +81,7 @@ function ProfilePage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress />
       </Box>
     )
@@ -91,7 +89,7 @@ function ProfilePage() {
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh', py: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 4 }}>
         <Card>
           <CardContent>
             <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
@@ -162,13 +160,8 @@ function ProfilePage() {
                 {isSaving ? 'Saving...' : 'Save profile'}
               </Button>
             </Box>
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              <Link component={RouterLink} to="/">
-                Back to dashboard
-              </Link>
-            </Typography>
             {profile && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
                 Last updated {new Date(profile.updated_at).toLocaleString()}
               </Typography>
             )}
