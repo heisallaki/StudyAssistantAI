@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.document import Document
     from app.models.subject import Subject
     from app.models.user_profile import UserProfile
 
@@ -33,5 +34,8 @@ class User(Base):
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
     subjects: Mapped[list["Subject"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
+    documents: Mapped[list["Document"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
     )

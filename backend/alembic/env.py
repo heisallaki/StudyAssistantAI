@@ -15,6 +15,7 @@ from app.models.user_profile import UserProfile
 config = context.config
 from app.models.subject import Subject
 from app.models.topic import Topic
+from app.models.document import Document
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

@@ -20,3 +20,15 @@ class SubjectNotFoundError(AppError):
 
 class TopicNotFoundError(AppError):
     pass
+
+
+class DocumentNotFoundError(AppError):
+    pass
+
+
+class UnsupportedFileTypeError(AppError):
+    pass
+
+
+class FileTooLargeError(AppError):
+    pass
