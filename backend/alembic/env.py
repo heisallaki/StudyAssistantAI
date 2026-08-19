@@ -16,6 +16,8 @@ config = context.config
 from app.models.subject import Subject
 from app.models.topic import Topic
 from app.models.document import Document
+from app.models.conversation import Conversation
+from app.models.message import Message
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

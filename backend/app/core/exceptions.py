@@ -32,3 +32,7 @@ class UnsupportedFileTypeError(AppError):
 
 class FileTooLargeError(AppError):
     pass
+
+
+class ConversationNotFoundError(AppError):
+    pass
