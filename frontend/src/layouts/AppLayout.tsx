@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 const NAV_LINKS = [
   { to: '/', label: 'Dashboard' },
   { to: '/subjects', label: 'Subjects' },
+  { to: '/documents', label: 'Documents' },
+  { to: '/tutor', label: 'AI Tutor' },
   { to: '/profile', label: 'Profile' },
 ]
 

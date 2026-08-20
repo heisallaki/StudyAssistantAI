@@ -114,6 +114,12 @@ function DashboardPage() {
               <Button variant="outlined" component={RouterLink} to="/subjects">
                 Manage subjects
               </Button>
+              <Button variant="outlined" component={RouterLink} to="/documents">
+                Upload documents
+              </Button>
+              <Button variant="outlined" component={RouterLink} to="/tutor">
+                Ask the AI tutor
+              </Button>
               <Button variant="outlined" component={RouterLink} to="/profile">
                 Edit profile
               </Button>
