@@ -14,6 +14,8 @@ class DocumentRead(BaseModel):
     file_size_bytes: int
     processing_status: str
     processing_error: str | None
+    indexing_status: str
+    indexing_error: str | None
     created_at: datetime
     updated_at: datetime
 

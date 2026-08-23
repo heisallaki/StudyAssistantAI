@@ -4,10 +4,12 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.ai.providers.embedding_base import EmbeddingProvider
+from app.api.deps import get_current_user, get_embedding_provider
 from app.core.exceptions import (
     DocumentNotFoundError,
     FileTooLargeError,
+    NoTextToIndexError,
     SubjectNotFoundError,
     UnsupportedFileTypeError,
 )
@@ -34,6 +36,7 @@ async def upload_document(
     subject_id: uuid.UUID | None = Form(default=None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    embedding_provider: EmbeddingProvider = Depends(get_embedding_provider),
 ):
     if not file.filename:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="A file is required")
@@ -41,8 +44,9 @@ async def upload_document(
     file_bytes = await file.read()
 
     try:
-        return document_service.upload_document(
+        return await document_service.upload_document(
             db,
+            embedding_provider,
             current_user.id,
             file.filename,
             file.content_type or "application/octet-stream",
@@ -100,6 +104,24 @@ def delete_document(
         document_service.delete_document(db, document_id, current_user.id)
     except DocumentNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+
+@router.post("/{document_id}/reindex", response_model=DocumentDetail)
+async def reindex_document(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    embedding_provider: EmbeddingProvider = Depends(get_embedding_provider),
+):
+    try:
+        return await document_service.reindex_document(db, embedding_provider, document_id, current_user.id)
+    except DocumentNotFoundError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    except NoTextToIndexError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="This document has no extracted text to index",
+        )
 
 
 @router.get("/{document_id}/download")

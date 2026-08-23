@@ -5,6 +5,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.ai.providers.base import AIProvider
+from app.ai.providers.embedding_base import EmbeddingProvider
+from app.ai.providers.ollama_embedding_provider import OllamaEmbeddingProvider
 from app.ai.providers.ollama_provider import OllamaProvider
 from app.ai.service import AITutorService
 from app.core.security import decode_access_token
@@ -15,8 +18,16 @@ from app.repositories import user_repository
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
+def get_ai_provider() -> AIProvider:
+    return OllamaProvider()
+
+
 def get_ai_tutor_service() -> AITutorService:
     return AITutorService(OllamaProvider())
+
+
+def get_embedding_provider() -> EmbeddingProvider:
+    return OllamaEmbeddingProvider()
 
 
 def get_current_user(

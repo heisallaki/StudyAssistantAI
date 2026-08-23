@@ -10,6 +10,7 @@ class MessageRead(BaseModel):
     id: uuid.UUID
     role: str
     content: str
+    sources: list[str]
     created_at: datetime
 
 

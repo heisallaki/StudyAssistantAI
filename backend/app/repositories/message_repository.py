@@ -14,8 +14,10 @@ def list_for_conversation(db: Session, conversation_id: uuid.UUID) -> list[Messa
     )
 
 
-def create(db: Session, conversation_id: uuid.UUID, role: str, content: str) -> Message:
-    message = Message(conversation_id=conversation_id, role=role, content=content)
+def create(
+    db: Session, conversation_id: uuid.UUID, role: str, content: str, sources: list[str] | None = None
+) -> Message:
+    message = Message(conversation_id=conversation_id, role=role, content=content, sources=sources or [])
     db.add(message)
     db.commit()
     db.refresh(message)

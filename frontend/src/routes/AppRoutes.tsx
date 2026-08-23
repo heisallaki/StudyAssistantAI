@@ -7,6 +7,8 @@ import DashboardPage from '../pages/dashboard/DashboardPage'
 import DocumentDetailPage from '../pages/documents/DocumentDetailPage'
 import DocumentsPage from '../pages/documents/DocumentsPage'
 import ProfilePage from '../pages/profile/ProfilePage'
+import QuizDetailPage from '../pages/quizzes/QuizDetailPage'
+import QuizzesPage from '../pages/quizzes/QuizzesPage'
 import SubjectDetailPage from '../pages/subjects/SubjectDetailPage'
 import SubjectsListPage from '../pages/subjects/SubjectsListPage'
 import ChatPage from '../pages/tutor/ChatPage'
@@ -26,6 +28,8 @@ function AppRoutes() {
           <Route path="/documents/:documentId" element={<DocumentDetailPage />} />
           <Route path="/tutor" element={<ConversationsPage />} />
           <Route path="/tutor/:conversationId" element={<ChatPage />} />
+          <Route path="/quizzes" element={<QuizzesPage />} />
+          <Route path="/quizzes/:quizId" element={<QuizDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

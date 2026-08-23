@@ -36,3 +36,11 @@ class FileTooLargeError(AppError):
 
 class ConversationNotFoundError(AppError):
     pass
+
+
+class NoTextToIndexError(AppError):
+    pass
+
+
+class QuizNotFoundError(AppError):
+    pass

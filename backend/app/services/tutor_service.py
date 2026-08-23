@@ -2,12 +2,20 @@ import uuid
 
 from sqlalchemy.orm import Session
 
+from app.ai.prompts.tutor_prompts import build_document_context
+from app.ai.providers.embedding_base import EmbeddingProvider, EmbeddingProviderError
 from app.ai.service import AITutorService
 from app.core.exceptions import ConversationNotFoundError, SubjectNotFoundError
 from app.models.conversation import Conversation
 from app.models.message import Message
-from app.repositories import conversation_repository, message_repository, subject_repository
+from app.repositories import (
+    conversation_repository,
+    document_chunk_repository,
+    message_repository,
+    subject_repository,
+)
 from app.schemas.conversation import ConversationCreate, ConversationUpdate
+from app.services.subject_context import build_subject_context
 
 
 def list_conversations(db: Session, user_id: uuid.UUID) -> list[Conversation]:
@@ -47,28 +55,24 @@ def delete_conversation(db: Session, conversation_id: uuid.UUID, user_id: uuid.U
     conversation_repository.delete(db, conversation)
 
 
-def _build_subject_context(db: Session, conversation: Conversation) -> str | None:
-    if conversation.subject_id is None:
-        return None
+async def _retrieve_relevant_chunks(
+    db: Session, embedding_provider: EmbeddingProvider, user_id: uuid.UUID, query: str
+) -> list[tuple[str, str, float]]:
+    try:
+        query_embeddings = await embedding_provider.embed([query])
+    except EmbeddingProviderError:
+        return []
 
-    subject = subject_repository.get_by_id_for_user(db, conversation.subject_id, conversation.user_id)
-    if subject is None:
-        return None
+    if not query_embeddings:
+        return []
 
-    context = f"The student is currently studying the subject '{subject.name}'."
-    if subject.description:
-        context += f" Description: {subject.description}."
-
-    topic_titles = [topic.title for topic in subject.topics]
-    if topic_titles:
-        context += f" Topics in this subject: {', '.join(topic_titles)}."
-
-    return context
+    return document_chunk_repository.search_similar_chunks(db, user_id, query_embeddings[0])
 
 
 async def send_message(
     db: Session,
     ai_service: AITutorService,
+    embedding_provider: EmbeddingProvider,
     conversation_id: uuid.UUID,
     user_id: uuid.UUID,
     content: str,
@@ -81,16 +85,23 @@ async def send_message(
         {"role": message.role, "content": message.content}
         for message in message_repository.list_for_conversation(db, conversation.id)
     ]
-    subject_context = _build_subject_context(db, conversation)
+    subject_context = build_subject_context(db, conversation.subject_id, user_id)
+
+    retrieved_chunks = await _retrieve_relevant_chunks(db, embedding_provider, user_id, content)
+    document_context = build_document_context(retrieved_chunks)
+    source_filenames = sorted({filename for filename, _content, _distance in retrieved_chunks})
 
     reply_content = await ai_service.generate_reply(
         history=history,
         explanation_level=conversation.explanation_level,
         mode=conversation.mode,
         subject_context=subject_context,
+        document_context=document_context,
     )
 
-    assistant_message = message_repository.create(db, conversation.id, "assistant", reply_content)
+    assistant_message = message_repository.create(
+        db, conversation.id, "assistant", reply_content, sources=source_filenames
+    )
 
     if conversation.title == "New conversation":
         conversation_repository.update(db, conversation, {"title": content[:60]})

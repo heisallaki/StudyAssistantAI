@@ -7,5 +7,5 @@ class AIProviderError(Exception):
 
 class AIProvider(ABC):
     @abstractmethod
-    async def generate_reply(self, messages: list[dict[str, str]]) -> str:
+    async def generate_reply(self, messages: list[dict[str, str]], response_format: str | None = None) -> str:
         raise NotImplementedError

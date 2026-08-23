@@ -1,3 +1,5 @@
+from app.ai.prompts.rag_prompts import build_document_context
+
 BASE_SYSTEM_PROMPT = (
     "You are a patient, encouraging AI study tutor for a student using StudyAssistant AI. "
     "Explain concepts clearly and check that the student understands before moving on. "
@@ -32,7 +34,12 @@ TUTOR_MODE_INSTRUCTION = (
 )
 
 
-def build_system_prompt(explanation_level: str, mode: str, subject_context: str | None) -> str:
+def build_system_prompt(
+    explanation_level: str,
+    mode: str,
+    subject_context: str | None,
+    document_context: str | None = None,
+) -> str:
     parts = [
         BASE_SYSTEM_PROMPT,
         EXPLANATION_LEVEL_INSTRUCTIONS.get(explanation_level, EXPLANATION_LEVEL_INSTRUCTIONS["intermediate"]),
@@ -40,4 +47,9 @@ def build_system_prompt(explanation_level: str, mode: str, subject_context: str 
     ]
     if subject_context:
         parts.append(subject_context)
+    if document_context:
+        parts.append(document_context)
     return "\n\n".join(parts)
+
+
+__all__ = ["build_system_prompt", "build_document_context"]

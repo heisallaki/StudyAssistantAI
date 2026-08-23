@@ -12,7 +12,8 @@ class AITutorService:
         explanation_level: str,
         mode: str,
         subject_context: str | None,
+        document_context: str | None = None,
     ) -> str:
-        system_prompt = build_system_prompt(explanation_level, mode, subject_context)
+        system_prompt = build_system_prompt(explanation_level, mode, subject_context, document_context)
         messages = [{"role": "system", "content": system_prompt}, *history]
         return await self.provider.generate_reply(messages)

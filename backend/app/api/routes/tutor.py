@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.ai.providers.base import AIProviderError
+from app.ai.providers.embedding_base import EmbeddingProvider
 from app.ai.service import AITutorService
-from app.api.deps import get_ai_tutor_service, get_current_user
+from app.api.deps import get_ai_tutor_service, get_current_user, get_embedding_provider
 from app.core.exceptions import ConversationNotFoundError, SubjectNotFoundError
 from app.db.session import get_db
 from app.models.user import User
@@ -87,9 +88,12 @@ async def send_message(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     ai_service: AITutorService = Depends(get_ai_tutor_service),
+    embedding_provider: EmbeddingProvider = Depends(get_embedding_provider),
 ):
     try:
-        return await tutor_service.send_message(db, ai_service, conversation_id, current_user.id, data.content)
+        return await tutor_service.send_message(
+            db, ai_service, embedding_provider, conversation_id, current_user.id, data.content
+        )
     except ConversationNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
     except AIProviderError as error:

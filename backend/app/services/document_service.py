@@ -4,17 +4,19 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
+from app.ai.providers.embedding_base import EmbeddingProvider
 from app.core.config import get_settings
 from app.core.exceptions import (
     DocumentNotFoundError,
     FileTooLargeError,
+    NoTextToIndexError,
     SubjectNotFoundError,
     UnsupportedFileTypeError,
 )
 from app.models.document import Document
 from app.repositories import document_repository, subject_repository
 from app.schemas.document import DocumentUpdate
-from app.services import document_processing
+from app.services import document_indexing_service, document_processing
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +40,9 @@ def get_document(db: Session, document_id: uuid.UUID, user_id: uuid.UUID) -> Doc
     return document
 
 
-def upload_document(
+async def upload_document(
     db: Session,
+    embedding_provider: EmbeddingProvider,
     user_id: uuid.UUID,
     original_filename: str,
     content_type: str,
@@ -75,9 +78,25 @@ def upload_document(
         extracted_text=extracted_text,
         processing_status=processing_status,
         processing_error=processing_error,
+        indexing_status="pending" if extracted_text is not None else "not_applicable",
     )
+    document = document_repository.create(db, document)
 
-    return document_repository.create(db, document)
+    if extracted_text is not None:
+        await document_indexing_service.index_document(db, embedding_provider, document)
+
+    return document
+
+
+async def reindex_document(
+    db: Session, embedding_provider: EmbeddingProvider, document_id: uuid.UUID, user_id: uuid.UUID
+) -> Document:
+    document = get_document(db, document_id, user_id)
+    if not document.extracted_text:
+        raise NoTextToIndexError(document_id)
+    await document_indexing_service.index_document(db, embedding_provider, document)
+    db.refresh(document)
+    return document
 
 
 def update_document(db: Session, document_id: uuid.UUID, user_id: uuid.UUID, data: DocumentUpdate) -> Document:

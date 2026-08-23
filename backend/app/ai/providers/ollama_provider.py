@@ -15,13 +15,14 @@ class OllamaProvider(AIProvider):
         self.base_url = (base_url or settings.OLLAMA_BASE_URL).rstrip("/")
         self.model = model or settings.OLLAMA_MODEL
 
-    async def generate_reply(self, messages: list[dict[str, str]]) -> str:
+    async def generate_reply(self, messages: list[dict[str, str]], response_format: str | None = None) -> str:
+        payload: dict = {"model": self.model, "messages": messages, "stream": False}
+        if response_format == "json":
+            payload["format"] = "json"
+
         try:
             async with httpx2.AsyncClient(timeout=120.0) as client:
-                response = await client.post(
-                    f"{self.base_url}/api/chat",
-                    json={"model": self.model, "messages": messages, "stream": False},
-                )
+                response = await client.post(f"{self.base_url}/api/chat", json=payload)
                 response.raise_for_status()
         except httpx2.ConnectError as error:
             logger.error("Could not connect to Ollama at %s: %s", self.base_url, error)

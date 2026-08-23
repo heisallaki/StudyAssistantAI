@@ -14,6 +14,14 @@ Phase 3 — Dashboard. The authenticated landing page is a real dashboard showin
 
 Phase 4 — Subjects & Courses. Users can create, edit, and delete subjects, add and remove topics within each subject, and mark topics complete. Progress percentage is computed server-side from real completion state. Ownership is enforced on every subject/topic endpoint — a user can never see or modify another user's data. Navigation is now a shared top bar (Dashboard / Subjects / Profile) rather than per-page links.
 
+Phase 5 — Document Management. Users can upload PDF and plain-text/markdown study materials (up to 20 MB), optionally tagged to a subject. Text is extracted synchronously on upload — PDFs via `pypdf`, text/markdown via UTF-8/Latin-1 decoding — and stored for future use by the AI Tutor and RAG phases. Processing failures (e.g. scanned PDFs with no embedded text) are tracked honestly rather than silently ignored. Files are stored on local disk under `UPLOAD_DIR`, scoped per document with UUID-based filenames; original filenames are preserved only as display metadata.
+
+Phase 6 — AI Tutor. Users can chat with a local AI tutor running via Ollama (`llama3.2:3b` by default — no cloud API, no API key). Conversations can be scoped to a subject for context, support adjustable explanation levels (beginner/intermediate/advanced), and a Socratic mode that guides with questions instead of direct answers. The AI layer is abstracted behind a generic provider interface so the backend model could be swapped later. Requires Ollama installed and running locally — see setup docs.
+
+Phase 7 — RAG Knowledge System. Uploaded documents are automatically chunked and embedded (via Ollama's `all-minilm` model) into PostgreSQL using the pgvector extension — no separate vector database. When chatting with the AI tutor, the student's own document chunks are searched for relevance and, when found, injected into the AI's context with source attribution; the assistant's reply records which documents it drew from. Irrelevant documents are correctly excluded rather than forced into every answer. Indexing failures (e.g. Ollama unavailable at upload time) are tracked honestly and can be retried per-document.
+
+Phase 8 — Quiz Generator. Users can generate AI-created quizzes (multiple choice, true/false, short answer) at a chosen difficulty, optionally scoped to a subject and grounded in that subject's indexed documents via the RAG system. The AI is prompted for strict JSON output (Ollama's JSON mode) and every question is validated before storage — malformed or internally-inconsistent questions (e.g. a multiple-choice answer not matching its own options) are filtered out rather than trusted. Generated quizzes are reviewable with answers and explanations shown.
+
 ## Tech Stack
 
 **Frontend:** React, TypeScript, Vite, Material UI, React Router, Axios, Recharts
