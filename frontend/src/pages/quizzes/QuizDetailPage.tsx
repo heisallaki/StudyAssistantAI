@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   Alert,
   Box,
   Button,
   Card,
+  CardActionArea,
   CardContent,
   Chip,
   CircularProgress,
@@ -16,7 +17,9 @@ import {
   Divider,
   Typography,
 } from '@mui/material'
+import * as quizAttemptService from '../../services/quizAttemptService'
 import * as quizService from '../../services/quizService'
+import type { QuizAttempt } from '../../types/quizAttempt'
 import type { QuizDetail, QuizQuestion } from '../../types/quiz'
 
 const STATUS_COLOR: Record<string, 'success' | 'warning' | 'default'> = {
@@ -94,6 +97,9 @@ function QuizDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [attempts, setAttempts] = useState<QuizAttempt[]>([])
+  const [isStarting, setIsStarting] = useState(false)
+  const [startError, setStartError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!quizId) return
@@ -104,6 +110,14 @@ function QuizDetailPage() {
       .finally(() => setIsLoading(false))
   }, [quizId])
 
+  useEffect(() => {
+    if (!quizId) return
+    quizAttemptService
+      .listAttempts({ quiz_id: quizId })
+      .then(setAttempts)
+      .catch(() => setAttempts([]))
+  }, [quizId])
+
   async function handleDelete() {
     if (!quizId) return
     setIsDeleting(true)
@@ -112,6 +126,20 @@ function QuizDetailPage() {
       navigate('/quizzes')
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  async function handleStartAttempt() {
+    if (!quizId) return
+    setIsStarting(true)
+    setStartError(null)
+    try {
+      const attempt = await quizAttemptService.startAttempt(quizId)
+      navigate(`/quizzes/${quizId}/attempts/${attempt.id}`)
+    } catch {
+      setStartError('Unable to start this quiz right now.')
+    } finally {
+      setIsStarting(false)
     }
   }
 
@@ -133,6 +161,8 @@ function QuizDetailPage() {
     )
   }
 
+  const canAttempt = quiz.generation_status === 'completed' && quiz.questions.length > 0
+
   return (
     <Container maxWidth="md">
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
@@ -148,15 +178,62 @@ function QuizDetailPage() {
               </Typography>
             </Box>
           </Box>
-          <Button variant="outlined" color="error" onClick={() => setIsDeleteDialogOpen(true)}>
-            Delete
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="contained" onClick={handleStartAttempt} disabled={!canAttempt || isStarting}>
+              {isStarting ? 'Starting...' : 'Start quiz'}
+            </Button>
+            <Button variant="outlined" color="error" onClick={() => setIsDeleteDialogOpen(true)}>
+              Delete
+            </Button>
+          </Box>
         </Box>
+
+        {startError && <Alert severity="error">{startError}</Alert>}
 
         {quiz.generation_status === 'failed' && (
           <Alert severity="warning">
             {quiz.generation_error ?? 'Quiz generation failed.'} Delete this quiz and try generating again.
           </Alert>
+        )}
+
+        {attempts.length > 0 && (
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  Your attempts
+                </Typography>
+                <Button component={RouterLink} to="/quizzes/history" size="small">
+                  View all history
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {attempts.slice(0, 5).map((attempt) => (
+                  <CardActionArea
+                    key={attempt.id}
+                    component={RouterLink}
+                    to={`/quizzes/${quiz.id}/attempts/${attempt.id}`}
+                    sx={{ borderRadius: 1, p: 1 }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(attempt.started_at).toLocaleString()}
+                      </Typography>
+                      {attempt.status === 'completed' ? (
+                        <Chip
+                          label={`${attempt.score} / ${attempt.total_questions}`}
+                          color={(attempt.percentage_score ?? 0) >= 70 ? 'success' : 'default'}
+                          size="small"
+                        />
+                      ) : (
+                        <Chip label="In progress" color="warning" size="small" />
+                      )}
+                    </Box>
+                  </CardActionArea>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
         )}
 
         {quiz.questions.map((question, index) => (

@@ -3,6 +3,8 @@ from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
 from app.models.message import Message
 from app.models.quiz import Quiz
+from app.models.quiz_attempt import QuizAttempt
+from app.models.quiz_attempt_answer import QuizAttemptAnswer
 from app.models.quiz_question import QuizQuestion
 from app.models.subject import Subject
 from app.models.topic import Topic
@@ -20,4 +22,6 @@ __all__ = [
     "Message",
     "Quiz",
     "QuizQuestion",
+    "QuizAttempt",
+    "QuizAttemptAnswer",
 ]

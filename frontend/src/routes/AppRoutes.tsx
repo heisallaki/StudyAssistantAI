@@ -7,7 +7,9 @@ import DashboardPage from '../pages/dashboard/DashboardPage'
 import DocumentDetailPage from '../pages/documents/DocumentDetailPage'
 import DocumentsPage from '../pages/documents/DocumentsPage'
 import ProfilePage from '../pages/profile/ProfilePage'
+import QuizAttemptPage from '../pages/quizzes/QuizAttemptPage'
 import QuizDetailPage from '../pages/quizzes/QuizDetailPage'
+import QuizHistoryPage from '../pages/quizzes/QuizHistoryPage'
 import QuizzesPage from '../pages/quizzes/QuizzesPage'
 import SubjectDetailPage from '../pages/subjects/SubjectDetailPage'
 import SubjectsListPage from '../pages/subjects/SubjectsListPage'
@@ -29,7 +31,9 @@ function AppRoutes() {
           <Route path="/tutor" element={<ConversationsPage />} />
           <Route path="/tutor/:conversationId" element={<ChatPage />} />
           <Route path="/quizzes" element={<QuizzesPage />} />
+          <Route path="/quizzes/history" element={<QuizHistoryPage />} />
           <Route path="/quizzes/:quizId" element={<QuizDetailPage />} />
+          <Route path="/quizzes/:quizId/attempts/:attemptId" element={<QuizAttemptPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

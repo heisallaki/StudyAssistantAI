@@ -44,3 +44,19 @@ class NoTextToIndexError(AppError):
 
 class QuizNotFoundError(AppError):
     pass
+
+
+class QuizNotReadyForAttemptError(AppError):
+    pass
+
+
+class QuizAttemptNotFoundError(AppError):
+    pass
+
+
+class QuizAttemptAlreadyCompletedError(AppError):
+    pass
+
+
+class QuizAttemptQuestionNotFoundError(AppError):
+    pass

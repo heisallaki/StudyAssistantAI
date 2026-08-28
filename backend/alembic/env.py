@@ -10,15 +10,9 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
 from app.db.base import Base
-from app.models.user import User
-from app.models.user_profile import UserProfile
+from app.models.init import *
+
 config = context.config
-from app.models.subject import Subject
-from app.models.topic import Topic
-from app.models.document import Document
-from app.models.conversation import Conversation
-from app.models.message import Message
-from app.models.document_chunk import DocumentChunk
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

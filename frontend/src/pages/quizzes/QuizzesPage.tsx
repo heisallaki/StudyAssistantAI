@@ -149,9 +149,14 @@ const [isLoading, setIsLoading] = useState(true)
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
             Quizzes
           </Typography>
-          <Button variant="contained" onClick={openDialog}>
-            Generate quiz
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" component={RouterLink} to="/quizzes/history">
+              History
+            </Button>
+            <Button variant="contained" onClick={openDialog}>
+              Generate quiz
+            </Button>
+          </Box>
         </Box>
 
         {error && <Alert severity="error">{error}</Alert>}
