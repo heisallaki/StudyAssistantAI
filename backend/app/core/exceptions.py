@@ -60,3 +60,15 @@ class QuizAttemptAlreadyCompletedError(AppError):
 
 class QuizAttemptQuestionNotFoundError(AppError):
     pass
+
+
+class FlashcardDeckNotFoundError(AppError):
+    pass
+
+
+class FlashcardNotFoundError(AppError):
+    pass
+
+
+class FlashcardGenerationFailedError(AppError):
+    pass

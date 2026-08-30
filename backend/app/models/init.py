@@ -1,6 +1,9 @@
 from app.models.conversation import Conversation
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
+from app.models.flashcard import Flashcard
+from app.models.flashcard_deck import FlashcardDeck
+from app.models.flashcard_progress import FlashcardProgress
 from app.models.message import Message
 from app.models.quiz import Quiz
 from app.models.quiz_attempt import QuizAttempt
@@ -24,4 +27,7 @@ __all__ = [
     "QuizQuestion",
     "QuizAttempt",
     "QuizAttemptAnswer",
+    "FlashcardDeck",
+    "Flashcard",
+    "FlashcardProgress",
 ]

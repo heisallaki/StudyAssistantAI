@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { to: '/documents', label: 'Documents' },
   { to: '/tutor', label: 'AI Tutor' },
   { to: '/quizzes', label: 'Quizzes' },
+  { to: '/flashcards', label: 'Flashcards' },
   { to: '/profile', label: 'Profile' },
 ]
 

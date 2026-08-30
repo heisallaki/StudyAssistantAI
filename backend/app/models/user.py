@@ -10,6 +10,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.conversation import Conversation
     from app.models.document import Document
+    from app.models.flashcard_deck import FlashcardDeck
     from app.models.quiz import Quiz
     from app.models.quiz_attempt import QuizAttempt
     from app.models.subject import Subject
@@ -50,4 +51,7 @@ class User(Base):
     )
     quiz_attempts: Mapped[list["QuizAttempt"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
+    )
+    flashcard_decks: Mapped[list["FlashcardDeck"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
     )

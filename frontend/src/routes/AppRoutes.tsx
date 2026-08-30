@@ -6,6 +6,9 @@ import RegisterPage from '../pages/auth/RegisterPage'
 import DashboardPage from '../pages/dashboard/DashboardPage'
 import DocumentDetailPage from '../pages/documents/DocumentDetailPage'
 import DocumentsPage from '../pages/documents/DocumentsPage'
+import DeckDetailPage from '../pages/flashcards/DeckDetailPage'
+import DecksPage from '../pages/flashcards/DecksPage'
+import FlashcardReviewPage from '../pages/flashcards/FlashcardReviewPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import QuizAttemptPage from '../pages/quizzes/QuizAttemptPage'
 import QuizDetailPage from '../pages/quizzes/QuizDetailPage'
@@ -34,6 +37,9 @@ function AppRoutes() {
           <Route path="/quizzes/history" element={<QuizHistoryPage />} />
           <Route path="/quizzes/:quizId" element={<QuizDetailPage />} />
           <Route path="/quizzes/:quizId/attempts/:attemptId" element={<QuizAttemptPage />} />
+          <Route path="/flashcards" element={<DecksPage />} />
+          <Route path="/flashcards/:deckId" element={<DeckDetailPage />} />
+          <Route path="/flashcards/:deckId/review" element={<FlashcardReviewPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
