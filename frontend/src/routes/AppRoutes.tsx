@@ -9,6 +9,7 @@ import DocumentsPage from '../pages/documents/DocumentsPage'
 import DeckDetailPage from '../pages/flashcards/DeckDetailPage'
 import DecksPage from '../pages/flashcards/DecksPage'
 import FlashcardReviewPage from '../pages/flashcards/FlashcardReviewPage'
+import PlannerPage from '../pages/planner/PlannerPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import QuizAttemptPage from '../pages/quizzes/QuizAttemptPage'
 import QuizDetailPage from '../pages/quizzes/QuizDetailPage'
@@ -40,6 +41,7 @@ function AppRoutes() {
           <Route path="/flashcards" element={<DecksPage />} />
           <Route path="/flashcards/:deckId" element={<DeckDetailPage />} />
           <Route path="/flashcards/:deckId/review" element={<FlashcardReviewPage />} />
+          <Route path="/planner" element={<PlannerPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

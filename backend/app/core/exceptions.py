@@ -72,3 +72,19 @@ class FlashcardNotFoundError(AppError):
 
 class FlashcardGenerationFailedError(AppError):
     pass
+
+
+class StudyGoalNotFoundError(AppError):
+    pass
+
+
+class StudySessionNotFoundError(AppError):
+    pass
+
+
+class DeadlineNotFoundError(AppError):
+    pass
+
+
+class PlannerRecommendationFailedError(AppError):
+    pass

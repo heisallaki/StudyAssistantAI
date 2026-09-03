@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   Checkbox,
+  Chip,
   CircularProgress,
   Container,
   Dialog,
@@ -20,12 +21,25 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  MenuItem,
   TextField,
   Typography,
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import * as subjectService from '../../services/subjectService'
-import type { SubjectDetail } from '../../types/subject'
+import type { SubjectDetail, SubjectPriority } from '../../types/subject'
+
+const PRIORITY_COLOR: Record<SubjectPriority, 'default' | 'warning' | 'error'> = {
+  low: 'default',
+  medium: 'warning',
+  high: 'error',
+}
+
+const PRIORITY_LABEL: Record<SubjectPriority, string> = {
+  low: 'Low priority',
+  medium: 'Medium priority',
+  high: 'High priority',
+}
 
 function SubjectDetailPage() {
   const { subjectId } = useParams<{ subjectId: string }>()
@@ -41,6 +55,7 @@ function SubjectDetailPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
+  const [editPriority, setEditPriority] = useState<SubjectPriority>('medium')
   const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -108,6 +123,7 @@ function SubjectDetailPage() {
     if (!subject) return
     setEditName(subject.name)
     setEditDescription(subject.description ?? '')
+    setEditPriority(subject.priority)
     setIsEditDialogOpen(true)
   }
 
@@ -119,6 +135,7 @@ function SubjectDetailPage() {
       await subjectService.updateSubject(subjectId, {
         name: editName,
         description: editDescription || null,
+        priority: editPriority,
       })
       setIsEditDialogOpen(false)
       await reloadSubject()
@@ -180,6 +197,12 @@ function SubjectDetailPage() {
               {subject.name}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
+              <Chip
+                label={PRIORITY_LABEL[subject.priority]}
+                color={PRIORITY_COLOR[subject.priority]}
+                size="small"
+                variant="outlined"
+              />
               <Button size="small" onClick={openEditDialog}>
                 Edit
               </Button>
@@ -283,6 +306,17 @@ function SubjectDetailPage() {
               minRows={2}
               fullWidth
             />
+            <TextField
+              select
+              label="Priority"
+              value={editPriority}
+              onChange={(event) => setEditPriority(event.target.value as SubjectPriority)}
+              fullWidth
+            >
+              <MenuItem value="low">Low</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="high">High</MenuItem>
+            </TextField>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>

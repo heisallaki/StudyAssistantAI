@@ -34,12 +34,14 @@ class SubjectCreate(BaseModel):
     name: str = Field(min_length=1, max_length=150)
     description: str | None = Field(default=None, max_length=2000)
     color: str | None = Field(default=None, max_length=20)
+    priority: str = Field(default="medium", pattern="^(low|medium|high)$")
 
 
 class SubjectUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=150)
     description: str | None = Field(default=None, max_length=2000)
     color: str | None = Field(default=None, max_length=20)
+    priority: str | None = Field(default=None, pattern="^(low|medium|high)$")
 
 
 class SubjectRead(BaseModel):
@@ -49,6 +51,7 @@ class SubjectRead(BaseModel):
     name: str
     description: str | None
     color: str | None
+    priority: str
     topic_count: int
     completed_topic_count: int
     progress_percentage: int

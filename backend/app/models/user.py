@@ -9,10 +9,13 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.conversation import Conversation
+    from app.models.deadline import Deadline
     from app.models.document import Document
     from app.models.flashcard_deck import FlashcardDeck
     from app.models.quiz import Quiz
     from app.models.quiz_attempt import QuizAttempt
+    from app.models.study_goal import StudyGoal
+    from app.models.study_session import StudySession
     from app.models.subject import Subject
     from app.models.user_profile import UserProfile
 
@@ -53,5 +56,14 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
     flashcard_decks: Mapped[list["FlashcardDeck"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
+    study_goals: Mapped[list["StudyGoal"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
+    study_sessions: Mapped[list["StudySession"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
+    deadlines: Mapped[list["Deadline"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
     )

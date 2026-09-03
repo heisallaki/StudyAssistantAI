@@ -8,6 +8,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Chip,
   CircularProgress,
   Container,
   Dialog,
@@ -15,11 +16,24 @@ import {
   DialogContent,
   DialogTitle,
   LinearProgress,
+  MenuItem,
   TextField,
   Typography,
 } from '@mui/material'
 import * as subjectService from '../../services/subjectService'
-import type { Subject } from '../../types/subject'
+import type { Subject, SubjectPriority } from '../../types/subject'
+
+const PRIORITY_COLOR: Record<SubjectPriority, 'default' | 'warning' | 'error'> = {
+  low: 'default',
+  medium: 'warning',
+  high: 'error',
+}
+
+const PRIORITY_LABEL: Record<SubjectPriority, string> = {
+  low: 'Low priority',
+  medium: 'Medium priority',
+  high: 'High priority',
+}
 
 function SubjectsListPage() {
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -29,6 +43,7 @@ function SubjectsListPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [priority, setPriority] = useState<SubjectPriority>('medium')
   const [isSaving, setIsSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -86,11 +101,13 @@ function SubjectsListPage() {
       await subjectService.createSubject({
         name,
         description: description || null,
+        priority,
       })
 
       setIsDialogOpen(false)
       setName('')
       setDescription('')
+      setPriority('medium')
       await reloadSubjects()
     } catch {
       setFormError('Unable to create subject. Please try again.')
@@ -147,9 +164,17 @@ function SubjectsListPage() {
                   >
                     <Typography variant="h6">{subject.name}</Typography>
 
-                    <Typography variant="body2" color="text.secondary">
-                      {subject.completed_topic_count}/{subject.topic_count} topics
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip
+                        label={PRIORITY_LABEL[subject.priority]}
+                        color={PRIORITY_COLOR[subject.priority]}
+                        size="small"
+                        variant="outlined"
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {subject.completed_topic_count}/{subject.topic_count} topics
+                      </Typography>
+                    </Box>
                   </Box>
 
                   {subject.description && (
@@ -199,6 +224,18 @@ function SubjectsListPage() {
               minRows={2}
               fullWidth
             />
+
+            <TextField
+              select
+              label="Priority"
+              value={priority}
+              onChange={(event) => setPriority(event.target.value as SubjectPriority)}
+              fullWidth
+            >
+              <MenuItem value="low">Low</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="high">High</MenuItem>
+            </TextField>
           </DialogContent>
 
           <DialogActions>

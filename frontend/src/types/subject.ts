@@ -9,11 +9,14 @@ export interface Topic {
   updated_at: string
 }
 
+export type SubjectPriority = 'low' | 'medium' | 'high'
+
 export interface Subject {
   id: string
   name: string
   description: string | null
   color: string | null
+  priority: SubjectPriority
   topic_count: number
   completed_topic_count: number
   progress_percentage: number
@@ -29,12 +32,14 @@ export interface SubjectCreateRequest {
   name: string
   description?: string | null
   color?: string | null
+  priority?: SubjectPriority
 }
 
 export interface SubjectUpdateRequest {
   name?: string
   description?: string | null
   color?: string | null
+  priority?: SubjectPriority
 }
 
 export interface TopicCreateRequest {

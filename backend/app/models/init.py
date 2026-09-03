@@ -1,4 +1,5 @@
 from app.models.conversation import Conversation
+from app.models.deadline import Deadline
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
 from app.models.flashcard import Flashcard
@@ -9,6 +10,8 @@ from app.models.quiz import Quiz
 from app.models.quiz_attempt import QuizAttempt
 from app.models.quiz_attempt_answer import QuizAttemptAnswer
 from app.models.quiz_question import QuizQuestion
+from app.models.study_goal import StudyGoal
+from app.models.study_session import StudySession
 from app.models.subject import Subject
 from app.models.topic import Topic
 from app.models.user import User
@@ -30,4 +33,7 @@ __all__ = [
     "FlashcardDeck",
     "Flashcard",
     "FlashcardProgress",
+    "StudyGoal",
+    "StudySession",
+    "Deadline",
 ]
