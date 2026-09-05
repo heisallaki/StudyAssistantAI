@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.documents import router as documents_router
@@ -24,3 +25,4 @@ api_router.include_router(quizzes_router, prefix="/quizzes", tags=["quizzes"])
 api_router.include_router(quiz_attempts_router, prefix="/quiz-attempts", tags=["quiz-attempts"])
 api_router.include_router(flashcard_decks_router, prefix="/decks", tags=["flashcards"])
 api_router.include_router(planner_router, prefix="/planner", tags=["planner"])
+api_router.include_router(analytics_router, prefix="/analytics", tags=["analytics"])

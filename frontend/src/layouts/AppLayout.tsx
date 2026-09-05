@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { to: '/quizzes', label: 'Quizzes' },
   { to: '/flashcards', label: 'Flashcards' },
   { to: '/planner', label: 'Planner' },
+  { to: '/analytics', label: 'Analytics' },
   { to: '/profile', label: 'Profile' },
 ]
 

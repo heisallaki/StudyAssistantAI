@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import ProtectedRoute from '../components/common/ProtectedRoute'
 import AppLayout from '../layouts/AppLayout'
+import ProgressAnalyticsPage from '../pages/analytics/ProgressAnalyticsPage'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
 import DashboardPage from '../pages/dashboard/DashboardPage'
@@ -42,6 +43,7 @@ function AppRoutes() {
           <Route path="/flashcards/:deckId" element={<DeckDetailPage />} />
           <Route path="/flashcards/:deckId/review" element={<FlashcardReviewPage />} />
           <Route path="/planner" element={<PlannerPage />} />
+          <Route path="/analytics" element={<ProgressAnalyticsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
