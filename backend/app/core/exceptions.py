@@ -88,3 +88,7 @@ class DeadlineNotFoundError(AppError):
 
 class PlannerRecommendationFailedError(AppError):
     pass
+
+
+class NotificationNotFoundError(AppError):
+    pass

@@ -1,6 +1,9 @@
+import { useCallback, useEffect, useState } from 'react'
 import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom'
-import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material'
+import { AppBar, Badge, Box, Button, IconButton, Toolbar, Typography } from '@mui/material'
+import NotificationsIcon from '@mui/icons-material/Notifications'
 import { useAuth } from '../hooks/useAuth'
+import * as notificationService from '../services/notificationService'
 
 const NAV_LINKS = [
   { to: '/', label: 'Dashboard' },
@@ -17,6 +20,18 @@ const NAV_LINKS = [
 function AppLayout() {
   const { logout } = useAuth()
   const location = useLocation()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const refreshUnreadCount = useCallback(() => {
+    notificationService
+      .getUnreadCount()
+      .then((data) => setUnreadCount(data.unread_count))
+      .catch(() => setUnreadCount(0))
+  }, [])
+
+  useEffect(() => {
+    refreshUnreadCount()
+  }, [refreshUnreadCount, location.pathname])
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -41,6 +56,11 @@ function AppLayout() {
               )
             })}
           </Box>
+          <IconButton component={RouterLink} to="/notifications" color="inherit" aria-label="Notifications">
+            <Badge badgeContent={unreadCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
           <Button variant="outlined" color="secondary" onClick={logout}>
             Log out
           </Button>

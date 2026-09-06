@@ -10,6 +10,7 @@ import DocumentsPage from '../pages/documents/DocumentsPage'
 import DeckDetailPage from '../pages/flashcards/DeckDetailPage'
 import DecksPage from '../pages/flashcards/DecksPage'
 import FlashcardReviewPage from '../pages/flashcards/FlashcardReviewPage'
+import NotificationsPage from '../pages/notifications/NotificationsPage'
 import PlannerPage from '../pages/planner/PlannerPage'
 import ProfilePage from '../pages/profile/ProfilePage'
 import QuizAttemptPage from '../pages/quizzes/QuizAttemptPage'
@@ -44,6 +45,7 @@ function AppRoutes() {
           <Route path="/flashcards/:deckId/review" element={<FlashcardReviewPage />} />
           <Route path="/planner" element={<PlannerPage />} />
           <Route path="/analytics" element={<ProgressAnalyticsPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

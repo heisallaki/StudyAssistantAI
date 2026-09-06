@@ -5,6 +5,7 @@ from app.core.security import create_access_token, hash_password, verify_passwor
 from app.models.user import User
 from app.repositories import user_repository
 from app.schemas.user import UserCreate, UserLogin
+from app.services import notification_service
 
 
 def register_user(db: Session, user_in: UserCreate) -> User:
@@ -13,7 +14,9 @@ def register_user(db: Session, user_in: UserCreate) -> User:
         raise EmailAlreadyRegisteredError(user_in.email)
 
     hashed_password = hash_password(user_in.password)
-    return user_repository.create(db, user_in, hashed_password)
+    user = user_repository.create(db, user_in, hashed_password)
+    notification_service.create_welcome_notification(db, user.id)
+    return user
 
 
 def authenticate_user(db: Session, credentials: UserLogin) -> User:

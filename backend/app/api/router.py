@@ -6,6 +6,7 @@ from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.documents import router as documents_router
 from app.api.routes.flashcard_decks import router as flashcard_decks_router
 from app.api.routes.health import router as health_router
+from app.api.routes.notifications import router as notifications_router
 from app.api.routes.planner import router as planner_router
 from app.api.routes.profile import router as profile_router
 from app.api.routes.quiz_attempts import router as quiz_attempts_router
@@ -26,3 +27,4 @@ api_router.include_router(quiz_attempts_router, prefix="/quiz-attempts", tags=["
 api_router.include_router(flashcard_decks_router, prefix="/decks", tags=["flashcards"])
 api_router.include_router(planner_router, prefix="/planner", tags=["planner"])
 api_router.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
