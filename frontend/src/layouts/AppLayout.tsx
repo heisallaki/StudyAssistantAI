@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom'
 import { AppBar, Badge, Box, Button, IconButton, Toolbar, Typography } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import SearchIcon from '@mui/icons-material/Search'
 import { useAuth } from '../hooks/useAuth'
 import * as notificationService from '../services/notificationService'
 
@@ -56,6 +57,9 @@ function AppLayout() {
               )
             })}
           </Box>
+          <IconButton component={RouterLink} to="/search" color="inherit" aria-label="Search">
+            <SearchIcon />
+          </IconButton>
           <IconButton component={RouterLink} to="/notifications" color="inherit" aria-label="Notifications">
             <Badge badgeContent={unreadCount} color="error">
               <NotificationsIcon />

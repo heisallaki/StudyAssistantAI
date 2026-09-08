@@ -92,3 +92,7 @@ class PlannerRecommendationFailedError(AppError):
 
 class NotificationNotFoundError(AppError):
     pass
+
+
+class SemanticSearchFailedError(AppError):
+    pass

@@ -11,6 +11,7 @@ from app.api.routes.planner import router as planner_router
 from app.api.routes.profile import router as profile_router
 from app.api.routes.quiz_attempts import router as quiz_attempts_router
 from app.api.routes.quizzes import router as quizzes_router
+from app.api.routes.search import router as search_router
 from app.api.routes.subjects import router as subjects_router
 from app.api.routes.tutor import router as tutor_router
 
@@ -28,3 +29,4 @@ api_router.include_router(flashcard_decks_router, prefix="/decks", tags=["flashc
 api_router.include_router(planner_router, prefix="/planner", tags=["planner"])
 api_router.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(search_router, prefix="/search", tags=["search"])

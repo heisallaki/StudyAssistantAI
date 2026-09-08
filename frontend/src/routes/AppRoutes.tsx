@@ -17,6 +17,7 @@ import QuizAttemptPage from '../pages/quizzes/QuizAttemptPage'
 import QuizDetailPage from '../pages/quizzes/QuizDetailPage'
 import QuizHistoryPage from '../pages/quizzes/QuizHistoryPage'
 import QuizzesPage from '../pages/quizzes/QuizzesPage'
+import SearchPage from '../pages/search/SearchPage'
 import SubjectDetailPage from '../pages/subjects/SubjectDetailPage'
 import SubjectsListPage from '../pages/subjects/SubjectsListPage'
 import ChatPage from '../pages/tutor/ChatPage'
@@ -46,6 +47,7 @@ function AppRoutes() {
           <Route path="/planner" element={<PlannerPage />} />
           <Route path="/analytics" element={<ProgressAnalyticsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

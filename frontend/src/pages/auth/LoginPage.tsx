@@ -14,19 +14,42 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError(null)
-    setIsSubmitting(true)
-    try {
-      await login({ email, password })
-      navigate('/')
-    } catch (err) {
-      const axiosError = err as AxiosError<{ detail?: string }>
-      setError(axiosError.response?.data?.detail || 'Unable to sign in. Please try again.')
-    } finally {
-      setIsSubmitting(false)
+  event.preventDefault()
+  setError(null)
+  setIsSubmitting(true)
+
+  try {
+    await login({ email, password })
+    navigate('/')
+  } catch (err) {
+    const axiosError = err as AxiosError<{ detail?: unknown }>
+    const detail = axiosError.response?.data?.detail
+
+    if (typeof detail === 'string') {
+      setError(detail)
+    } else if (Array.isArray(detail)) {
+      setError(
+        detail
+          .map((item) => {
+            if (
+              typeof item === 'object' &&
+              item !== null &&
+              'msg' in item
+            ) {
+              return String((item as { msg: unknown }).msg)
+            }
+
+            return String(item)
+          })
+          .join(', ')
+      )
+    } else {
+      setError('Unable to sign in. Please check your email and password.')
     }
+  } finally {
+    setIsSubmitting(false)
   }
+}
 
   return (
     <Container maxWidth="xs">

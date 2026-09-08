@@ -31,7 +31,11 @@ async def index_document(db: Session, embedding_provider: EmbeddingProvider, doc
         db.commit()
         return
 
-    document_chunk_repository.replace_chunks(db, document.id, chunks, embeddings)
+    document_chunk_repository.replace_chunks_for_document(
+        db,
+        document.id,
+        list(zip(range(len(chunks)), chunks, embeddings)),
+    )
     document.indexing_status = "indexed"
     document.indexing_error = None
     db.add(document)
