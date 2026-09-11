@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.routes.admin import router as admin_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.dashboard import router as dashboard_router
@@ -30,3 +31,4 @@ api_router.include_router(planner_router, prefix="/planner", tags=["planner"])
 api_router.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(search_router, prefix="/search", tags=["search"])
+api_router.include_router(admin_router, prefix="/admin", tags=["admin"])

@@ -96,3 +96,15 @@ class NotificationNotFoundError(AppError):
 
 class SemanticSearchFailedError(AppError):
     pass
+
+
+class UserNotFoundError(AppError):
+    pass
+
+
+class CannotModifySelfError(AppError):
+    pass
+
+
+class LastAdministratorError(AppError):
+    pass
