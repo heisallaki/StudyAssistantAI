@@ -19,9 +19,11 @@ const NAV_LINKS = [
 ]
 
 function AppLayout() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const location = useLocation()
   const [unreadCount, setUnreadCount] = useState(0)
+
+  const navLinks = user?.is_superuser ? [...NAV_LINKS, { to: '/admin', label: 'Admin' }] : NAV_LINKS
 
   const refreshUnreadCount = useCallback(() => {
     notificationService
@@ -42,7 +44,7 @@ function AppLayout() {
             StudyAssistant AI
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexGrow: 1 }}>
-            {NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const isActive =
                 link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to)
               return (

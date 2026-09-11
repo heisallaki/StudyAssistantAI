@@ -1,6 +1,9 @@
 import { Route, Routes } from 'react-router-dom'
+import AdminRoute from '../components/common/AdminRoute'
 import ProtectedRoute from '../components/common/ProtectedRoute'
 import AppLayout from '../layouts/AppLayout'
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
+import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import ProgressAnalyticsPage from '../pages/analytics/ProgressAnalyticsPage'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
@@ -49,6 +52,10 @@ function AppRoutes() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+          </Route>
         </Route>
       </Route>
     </Routes>
