@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import AdminRoute from '../components/common/AdminRoute'
 import ProtectedRoute from '../components/common/ProtectedRoute'
 import AppLayout from '../layouts/AppLayout'
+import AdminAuditLogPage from '../pages/admin/AdminAuditLogPage'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import ProgressAnalyticsPage from '../pages/analytics/ProgressAnalyticsPage'
@@ -55,6 +56,7 @@ function AppRoutes() {
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/audit-log" element={<AdminAuditLogPage />} />
           </Route>
         </Route>
       </Route>

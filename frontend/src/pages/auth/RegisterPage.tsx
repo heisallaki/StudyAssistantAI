@@ -28,8 +28,26 @@ function RegisterPage() {
       await register({ email, password })
       navigate('/')
     } catch (err) {
-      const axiosError = err as AxiosError<{ detail?: string }>
-      setError(axiosError.response?.data?.detail || 'Unable to create your account. Please try again.')
+      const axiosError = err as AxiosError<{ detail?: unknown }>
+      const detail = axiosError.response?.data?.detail
+
+      if (typeof detail === 'string') {
+        setError(detail)
+      } else if (Array.isArray(detail)) {
+        setError(
+          detail
+            .map((item) => {
+              if (typeof item === 'object' && item !== null && 'msg' in item) {
+                return String((item as { msg: unknown }).msg)
+              }
+
+              return String(item)
+            })
+            .join(', ')
+        )
+      } else {
+        setError('Unable to create your account. Please try again.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -64,7 +82,7 @@ function RegisterPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 fullWidth
-                helperText="At least 8 characters"
+                helperText="At least 8 characters, with uppercase, lowercase, a number, and a special character"
               />
               <TextField
                 label="Confirm password"

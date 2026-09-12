@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
@@ -20,3 +21,11 @@ def create(db: Session, user_in: UserCreate, hashed_password: str) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+
+def update_login_state(
+    db: Session, user: User, failed_login_attempts: int, locked_until: datetime | None
+) -> None:
+    user.failed_login_attempts = failed_login_attempts
+    user.locked_until = locked_until
+    db.commit()

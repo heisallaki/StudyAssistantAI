@@ -1,3 +1,4 @@
+from app.models.admin_audit_log import AdminAuditLog
 from app.models.conversation import Conversation
 from app.models.deadline import Deadline
 from app.models.document import Document
@@ -38,4 +39,5 @@ __all__ = [
     "StudySession",
     "Deadline",
     "Notification",
+    "AdminAuditLog",
 ]

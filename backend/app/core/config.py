@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:5173"
     UPLOAD_DIR: str = "./uploads"
     MAX_UPLOAD_SIZE_MB: int = 20
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+    RATE_LIMIT_ENABLED: bool = True
+    LOGIN_RATE_LIMIT: str = "10/minute"
+    REGISTER_RATE_LIMIT: str = "5/minute"
+    FAILED_LOGIN_LOCKOUT_THRESHOLD: int = 5
+    FAILED_LOGIN_LOCKOUT_MINUTES: int = 15
 
     @property
     def cors_origins_list(self) -> List[str]:

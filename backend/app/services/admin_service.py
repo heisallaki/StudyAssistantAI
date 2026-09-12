@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import CannotModifySelfError, LastAdministratorError, UserNotFoundError
 from app.models.user import User
-from app.repositories import admin_repository
+from app.repositories import admin_repository, audit_log_repository
 from app.schemas.admin import AdminSystemStats, AdminUserListResponse, AdminUserRead, AdminUserUpdate
+from app.schemas.audit_log import AuditLogListResponse, AuditLogRead
 
 MAX_PAGE_SIZE = 100
 
@@ -73,10 +74,29 @@ def update_user(db: Session, actor: User, user_id: uuid.UUID, data: AdminUserUpd
     if data.is_superuser is False and user.is_superuser and admin_repository.count_admins(db) <= 1:
         raise LastAdministratorError(str(user_id))
 
-    if data.is_active is not None:
+    if data.is_active is not None and data.is_active != user.is_active:
         user.is_active = data.is_active
-    if data.is_superuser is not None:
+        audit_log_repository.create(
+            db,
+            actor.id,
+            actor.email,
+            user.id,
+            user.email,
+            "activate_user" if data.is_active else "deactivate_user",
+            None,
+        )
+
+    if data.is_superuser is not None and data.is_superuser != user.is_superuser:
         user.is_superuser = data.is_superuser
+        audit_log_repository.create(
+            db,
+            actor.id,
+            actor.email,
+            user.id,
+            user.email,
+            "grant_admin" if data.is_superuser else "revoke_admin",
+            None,
+        )
 
     db.commit()
     db.refresh(user)
@@ -96,9 +116,26 @@ def delete_user(db: Session, actor: User, user_id: uuid.UUID) -> None:
     if user.is_superuser and admin_repository.count_admins(db) <= 1:
         raise LastAdministratorError(str(user_id))
 
+    audit_log_repository.create(db, actor.id, actor.email, user.id, user.email, "delete_user", None)
     admin_repository.delete_user(db, user)
 
 
 def get_system_stats(db: Session) -> AdminSystemStats:
     stats = admin_repository.get_system_stats(db)
     return AdminSystemStats(**stats)
+
+
+def list_audit_log(db: Session, page: int, page_size: int) -> AuditLogListResponse:
+    normalized_page = max(page, 1)
+    normalized_page_size = min(max(page_size, 1), MAX_PAGE_SIZE)
+
+    entries, total = audit_log_repository.list_entries(db, normalized_page, normalized_page_size)
+    total_pages = (total + normalized_page_size - 1) // normalized_page_size if total else 0
+
+    return AuditLogListResponse(
+        items=[AuditLogRead.model_validate(entry) for entry in entries],
+        total=total,
+        page=normalized_page,
+        page_size=normalized_page_size,
+        total_pages=total_pages,
+    )

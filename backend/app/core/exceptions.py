@@ -14,6 +14,10 @@ class InactiveUserError(AppError):
     pass
 
 
+class AccountLockedError(AppError):
+    pass
+
+
 class SubjectNotFoundError(AppError):
     pass
 

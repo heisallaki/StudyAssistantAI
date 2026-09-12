@@ -1,17 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.config import get_settings
 from app.core.exceptions import (
+    AccountLockedError,
     EmailAlreadyRegisteredError,
     InactiveUserError,
     InvalidCredentialsError,
 )
+from app.core.rate_limit import limiter
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import Token, UserCreate, UserLogin, UserRead
 from app.services import auth_service
 
+settings = get_settings()
 router = APIRouter()
 
 
@@ -20,7 +24,9 @@ router = APIRouter()
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
 )
+@limiter.limit(settings.REGISTER_RATE_LIMIT)
 def register(
+    request: Request,
     user_in: UserCreate,
     db: Session = Depends(get_db),
 ):
@@ -37,7 +43,9 @@ def register(
     "/login",
     response_model=Token,
 )
+@limiter.limit(settings.LOGIN_RATE_LIMIT)
 def login(
+    request: Request,
     credentials: UserLogin,
     db: Session = Depends(get_db),
 ):
@@ -46,8 +54,13 @@ def login(
     except InvalidCredentialsError as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(error),
+            detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
+        ) from error
+    except AccountLockedError as error:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="Too many failed login attempts. Please try again later.",
         ) from error
     except InactiveUserError as error:
         raise HTTPException(

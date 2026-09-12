@@ -84,9 +84,14 @@ function AdminDashboardPage() {
             Administration
           </Typography>
 
-          <Button variant="contained" component={RouterLink} to="/admin/users">
-            Manage users
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button variant="outlined" component={RouterLink} to="/admin/audit-log">
+              Audit log
+            </Button>
+            <Button variant="contained" component={RouterLink} to="/admin/users">
+              Manage users
+            </Button>
+          </Box>
         </Box>
 
         {error && <Alert severity="error">{error}</Alert>}

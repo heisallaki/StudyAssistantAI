@@ -13,6 +13,7 @@ from app.schemas.admin import (
     AdminUserRead,
     AdminUserUpdate,
 )
+from app.schemas.audit_log import AuditLogListResponse
 from app.services import admin_service
 
 router = APIRouter()
@@ -24,6 +25,16 @@ def get_system_stats(
     db: Session = Depends(get_db),
 ):
     return admin_service.get_system_stats(db)
+
+
+@router.get("/audit-log", response_model=AuditLogListResponse)
+def list_audit_log(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    current_admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+    return admin_service.list_audit_log(db, page, page_size)
 
 
 @router.get("/users", response_model=AdminUserListResponse)
