@@ -205,6 +205,50 @@ def test_admin_can_delete_another_user(admin_user, regular_user):
     assert get_response.status_code == 404
 
 
+def test_update_user_route_maps_last_administrator_error_to_400(admin_user, regular_user, monkeypatch):
+    from app.core.exceptions import LastAdministratorError
+    from app.services import admin_service
+
+    def _raise_last_administrator_error(*args, **kwargs):
+        raise LastAdministratorError("simulated")
+
+    monkeypatch.setattr(admin_service, "update_user", _raise_last_administrator_error)
+
+    list_response = client.get(
+        "/api/v1/admin/users",
+        params={"search": regular_user["email"]},
+        headers=admin_user["headers"],
+    )
+    user_id = list_response.json()["items"][0]["id"]
+
+    response = client.patch(
+        f"/api/v1/admin/users/{user_id}",
+        json={"is_superuser": False},
+        headers=admin_user["headers"],
+    )
+    assert response.status_code == 400
+
+
+def test_delete_user_route_maps_last_administrator_error_to_400(admin_user, regular_user, monkeypatch):
+    from app.core.exceptions import LastAdministratorError
+    from app.services import admin_service
+
+    def _raise_last_administrator_error(*args, **kwargs):
+        raise LastAdministratorError("simulated")
+
+    monkeypatch.setattr(admin_service, "delete_user", _raise_last_administrator_error)
+
+    list_response = client.get(
+        "/api/v1/admin/users",
+        params={"search": regular_user["email"]},
+        headers=admin_user["headers"],
+    )
+    user_id = list_response.json()["items"][0]["id"]
+
+    response = client.delete(f"/api/v1/admin/users/{user_id}", headers=admin_user["headers"])
+    assert response.status_code == 400
+
+
 def test_admin_stats_returns_system_counts(admin_user, regular_user):
     response = client.get("/api/v1/admin/stats", headers=admin_user["headers"])
     assert response.status_code == 200
@@ -213,3 +257,98 @@ def test_admin_stats_returns_system_counts(admin_user, regular_user):
     assert body["admin_users"] >= 1
     assert "total_subjects" in body
     assert "total_documents" in body
+
+
+def test_admin_update_returns_404_for_missing_user(admin_user):
+    response = client.patch(
+        f"/api/v1/admin/users/{uuid.uuid4()}",
+        json={"is_active": False},
+        headers=admin_user["headers"],
+    )
+    assert response.status_code == 404
+
+
+def test_admin_delete_returns_404_for_missing_user(admin_user):
+    response = client.delete(f"/api/v1/admin/users/{uuid.uuid4()}", headers=admin_user["headers"])
+    assert response.status_code == 404
+
+
+def test_service_blocks_revoking_the_last_administrator(admin_user, regular_user):
+    from app.core.exceptions import LastAdministratorError
+    from app.schemas.admin import AdminUserUpdate
+    from app.services import admin_service
+
+    db = SessionLocal()
+    try:
+        actor = db.query(User).filter(User.email == regular_user["email"]).first()
+        target = db.query(User).filter(User.email == admin_user["email"]).first()
+        with pytest.raises(LastAdministratorError):
+            admin_service.update_user(db, actor, target.id, AdminUserUpdate(is_superuser=False))
+    finally:
+        db.close()
+
+
+def test_service_blocks_deleting_the_last_administrator(admin_user, regular_user):
+    from app.core.exceptions import LastAdministratorError
+    from app.services import admin_service
+
+    db = SessionLocal()
+    try:
+        actor = db.query(User).filter(User.email == regular_user["email"]).first()
+        target = db.query(User).filter(User.email == admin_user["email"]).first()
+        with pytest.raises(LastAdministratorError):
+            admin_service.delete_user(db, actor, target.id)
+    finally:
+        db.close()
+
+
+def test_admin_can_filter_users_by_active_status(admin_user, regular_user):
+    list_response = client.get(
+        "/api/v1/admin/users",
+        params={"search": regular_user["email"]},
+        headers=admin_user["headers"],
+    )
+    regular_user_id = list_response.json()["items"][0]["id"]
+    client.patch(
+        f"/api/v1/admin/users/{regular_user_id}",
+        json={"is_active": False},
+        headers=admin_user["headers"],
+    )
+
+    response = client.get(
+        "/api/v1/admin/users",
+        params={"is_active": False},
+        headers=admin_user["headers"],
+    )
+    assert response.status_code == 200
+    emails = [item["email"] for item in response.json()["items"]]
+    assert regular_user["email"] in emails
+    assert all(not item["is_active"] for item in response.json()["items"])
+
+
+def test_admin_can_filter_users_by_role(admin_user, regular_user):
+    response = client.get(
+        "/api/v1/admin/users",
+        params={"is_superuser": True},
+        headers=admin_user["headers"],
+    )
+    assert response.status_code == 200
+    emails = [item["email"] for item in response.json()["items"]]
+    assert admin_user["email"] in emails
+    assert regular_user["email"] not in emails
+    assert all(item["is_superuser"] for item in response.json()["items"])
+
+
+def test_admin_user_list_reflects_activity_counts(admin_user, regular_user):
+    client.post(
+        "/api/v1/subjects",
+        json={"name": "Organic Chemistry"},
+        headers=regular_user["headers"],
+    )
+
+    response = client.get(
+        "/api/v1/admin/users",
+        params={"search": regular_user["email"]},
+        headers=admin_user["headers"],
+    )
+    assert response.json()["items"][0]["subject_count"] == 1

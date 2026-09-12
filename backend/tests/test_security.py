@@ -120,6 +120,14 @@ def test_successful_login_resets_failed_attempts():
     _cleanup_user(email)
 
 
+def test_login_with_unregistered_email_returns_401():
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": f"{uuid.uuid4()}@example.com", "password": "S3curePassw0rd!"},
+    )
+    assert response.status_code == 401
+
+
 def test_security_headers_present_on_response():
     response = client.get("/api/v1/health")
     assert response.headers.get("x-content-type-options") == "nosniff"

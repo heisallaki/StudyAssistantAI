@@ -1,0 +1,11 @@
+[run]
+source = app
+omit =
+    app/ai/providers/ollama_provider.py
+    app/ai/providers/ollama_embedding_provider.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    raise NotImplementedError
