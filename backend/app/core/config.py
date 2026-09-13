@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     REGISTER_RATE_LIMIT: str = "5/minute"
     FAILED_LOGIN_LOCKOUT_THRESHOLD: int = 5
     FAILED_LOGIN_LOCKOUT_MINUTES: int = 15
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_RECYCLE_SECONDS: int = 1800
 
     @property
     def cors_origins_list(self) -> List[str]:

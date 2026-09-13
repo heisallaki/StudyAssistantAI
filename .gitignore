@@ -15,4 +15,5 @@ dist-ssr/
 *.log
 .coverage
 htmlcov/
+coverage/
 uploads/

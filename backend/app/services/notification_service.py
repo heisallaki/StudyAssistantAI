@@ -87,7 +87,6 @@ def list_notifications(db: Session, user_id: uuid.UUID, unread_only: bool = Fals
 
 
 def get_unread_count(db: Session, user_id: uuid.UUID) -> int:
-    _generate_due_notifications(db, user_id)
     return notification_repository.count_unread(db, user_id)
 
 

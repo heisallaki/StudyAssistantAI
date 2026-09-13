@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -43,6 +44,7 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

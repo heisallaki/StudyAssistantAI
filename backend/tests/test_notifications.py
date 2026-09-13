@@ -43,6 +43,36 @@ def test_unread_count_reflects_welcome_notification(authenticated_user):
     assert response.json()["unread_count"] == 1
 
 
+def test_unread_count_does_not_trigger_reminder_generation(authenticated_user):
+    client.post(
+        "/api/v1/planner/sessions",
+        json={
+            "title": "Review chapter 3",
+            "scheduled_date": date.today().isoformat(),
+            "duration_minutes": 30,
+        },
+        headers=authenticated_user["headers"],
+    )
+
+    before = client.get(
+        "/api/v1/notifications/unread-count", headers=authenticated_user["headers"]
+    ).json()
+    assert before["unread_count"] == 1
+
+    after = client.get(
+        "/api/v1/notifications/unread-count", headers=authenticated_user["headers"]
+    ).json()
+    assert after["unread_count"] == 1
+
+    list_response = client.get("/api/v1/notifications", headers=authenticated_user["headers"])
+    assert any(item["notification_type"] == "study_reminder" for item in list_response.json())
+
+    final_count = client.get(
+        "/api/v1/notifications/unread-count", headers=authenticated_user["headers"]
+    ).json()
+    assert final_count["unread_count"] == 2
+
+
 def test_mark_notification_read(authenticated_user):
     headers = authenticated_user["headers"]
     notification = client.get("/api/v1/notifications", headers=headers).json()[0]
