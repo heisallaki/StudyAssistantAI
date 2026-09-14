@@ -3,3 +3,8 @@ html, body, #root {
   margin: 0;
   padding: 0;
 }
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}

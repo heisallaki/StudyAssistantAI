@@ -66,6 +66,58 @@ def test_update_profile_rejects_invalid_academic_level(authenticated_user):
     assert response.status_code == 422
 
 
+def test_update_profile_creates_matching_subjects(authenticated_user):
+    response = client.patch(
+        "/api/v1/profile/me",
+        json={"subjects": ["Databases", "Software Engineering"]},
+        headers=authenticated_user["headers"],
+    )
+    assert response.status_code == 200
+
+    subjects_response = client.get("/api/v1/subjects", headers=authenticated_user["headers"])
+    assert subjects_response.status_code == 200
+    names = {subject["name"] for subject in subjects_response.json()}
+    assert {"Databases", "Software Engineering"}.issubset(names)
+
+    created_subject = next(
+        subject for subject in subjects_response.json() if subject["name"] == "Databases"
+    )
+    assert created_subject["priority"] == "medium"
+    assert created_subject["description"] is None
+
+
+def test_update_profile_does_not_duplicate_existing_subjects(authenticated_user):
+    client.post("/api/v1/subjects", json={"name": "Databases"}, headers=authenticated_user["headers"])
+
+    client.patch(
+        "/api/v1/profile/me",
+        json={"subjects": ["databases", "New Subject"]},
+        headers=authenticated_user["headers"],
+    )
+
+    subjects_response = client.get("/api/v1/subjects", headers=authenticated_user["headers"])
+    names = [subject["name"] for subject in subjects_response.json()]
+    assert names.count("Databases") == 1
+    assert "New Subject" in names
+
+
+def test_update_profile_does_not_remove_subjects_when_list_shrinks(authenticated_user):
+    client.patch(
+        "/api/v1/profile/me",
+        json={"subjects": ["Databases", "Software Engineering"]},
+        headers=authenticated_user["headers"],
+    )
+    client.patch(
+        "/api/v1/profile/me",
+        json={"subjects": ["Databases"]},
+        headers=authenticated_user["headers"],
+    )
+
+    subjects_response = client.get("/api/v1/subjects", headers=authenticated_user["headers"])
+    names = {subject["name"] for subject in subjects_response.json()}
+    assert {"Databases", "Software Engineering"}.issubset(names)
+
+
 def test_profile_requires_authentication():
     response = client.get("/api/v1/profile/me")
     assert response.status_code == 401

@@ -74,7 +74,7 @@ function DashboardPage() {
                 Study Statistics
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                   <Typography variant="body2">Profile completion</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     {overview.profile_completion_percentage}%

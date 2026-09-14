@@ -204,7 +204,7 @@ function SearchPage() {
                         <Box
                           sx={{
                             display: 'flex',
-                            justifyContent: 'space-between',
+                            justifyContent: 'space-between', flexWrap: 'wrap',
                             alignItems: 'center',
                             mb: 0.5,
                           }}

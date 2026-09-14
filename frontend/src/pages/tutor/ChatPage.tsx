@@ -106,7 +106,14 @@ function ChatPage() {
 
   return (
     <Container maxWidth="md">
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', py: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
+          py: 2,
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
