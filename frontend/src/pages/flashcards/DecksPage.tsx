@@ -105,7 +105,7 @@ function DecksPage() {
   return (
     <Container maxWidth="md">
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
             Flashcards
           </Typography>
@@ -131,7 +131,7 @@ function DecksPage() {
             <Card key={deck.id}>
               <CardActionArea component={RouterLink} to={`/flashcards/${deck.id}`}>
                 <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center', mb: 1 }}>
                     <Typography variant="h6">{deck.title}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {subjectName(deck.subject_id)} · {deck.card_count} cards
@@ -139,7 +139,7 @@ function DecksPage() {
                   </Box>
                   {deck.card_count > 0 && (
                     <>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', mb: 0.5 }}>
                         <Typography variant="body2" color="text.secondary">
                           {deck.mastered_count}/{deck.card_count} mastered
                         </Typography>

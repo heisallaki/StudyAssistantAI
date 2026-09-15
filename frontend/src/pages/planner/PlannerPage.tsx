@@ -252,7 +252,7 @@ function CalendarTab({ subjects }: CalendarTabProps) {
 
       <Card>
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: recommendations ? 2 : 0 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center', mb: recommendations ? 2 : 0 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               AI recommendations
             </Typography>
@@ -315,7 +315,7 @@ function CalendarTab({ subjects }: CalendarTabProps) {
                 {(entriesByDate.get(dateKey) ?? []).map((entry) => (
                   <Card key={`${entry.entry_type}-${entry.id}`} variant="outlined">
                     <CardContent
-                      sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}
+                      sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         {entry.entry_type === 'deadline' ? (
@@ -638,7 +638,7 @@ function GoalsTab({ subjects }: GoalsTabProps) {
           {goals.map((goal) => (
             <Card key={goal.id} variant="outlined">
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1 }}>
                   <Box>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       {goal.title}

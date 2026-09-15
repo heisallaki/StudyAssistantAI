@@ -72,7 +72,7 @@ function FlashcardRow({ card, onSave, onDelete }: FlashcardRowProps) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1, mb: 1 }}>
           <Chip
             label={STATUS_LABEL[card.progress.status]}
             color={STATUS_COLOR[card.progress.status]}
@@ -345,7 +345,7 @@ function DeckDetailPage() {
 
         <Card>
           <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', mb: 1 }}>
               <Typography variant="body2">Mastery</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {deck.mastered_count}/{deck.card_count} cards ({deck.mastery_percentage}%)

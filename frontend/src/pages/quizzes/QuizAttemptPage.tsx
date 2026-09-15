@@ -50,7 +50,7 @@ function QuestionInputCard({
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1, mb: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {index + 1}. {question.prompt}
           </Typography>
@@ -118,7 +118,7 @@ function QuestionResultCard({ question, index }: { question: QuizAttemptQuestion
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1, mb: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {index + 1}. {question.prompt}
           </Typography>

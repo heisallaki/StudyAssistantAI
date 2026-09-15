@@ -38,7 +38,7 @@ function QuestionCard({ question, index }: { question: QuizQuestion; index: numb
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 1, mb: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             {index + 1}. {question.prompt}
           </Typography>
@@ -199,7 +199,7 @@ function QuizDetailPage() {
         {attempts.length > 0 && (
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center', mb: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   Your attempts
                 </Typography>
@@ -215,7 +215,7 @@ function QuizDetailPage() {
                     to={`/quizzes/${quiz.id}/attempts/${attempt.id}`}
                     sx={{ borderRadius: 1, p: 1 }}
                   >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
                       <Typography variant="body2" color="text.secondary">
                         {new Date(attempt.started_at).toLocaleString()}
                       </Typography>

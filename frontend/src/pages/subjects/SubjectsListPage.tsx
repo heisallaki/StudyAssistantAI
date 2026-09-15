@@ -127,7 +127,7 @@ function SubjectsListPage() {
   return (
     <Container maxWidth="md">
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
             Subjects
           </Typography>
@@ -157,7 +157,7 @@ function SubjectsListPage() {
                   <Box
                     sx={{
                       display: 'flex',
-                      justifyContent: 'space-between',
+                      justifyContent: 'space-between', flexWrap: 'wrap',
                       alignItems: 'center',
                       mb: 1,
                     }}

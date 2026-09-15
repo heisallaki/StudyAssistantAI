@@ -192,7 +192,7 @@ function SubjectDetailPage() {
     <Container maxWidth="sm">
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 2 }}>
             <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
               {subject.name}
             </Typography>
@@ -220,7 +220,7 @@ function SubjectDetailPage() {
 
         <Card>
           <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', mb: 1 }}>
               <Typography variant="body2">Progress</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {subject.completed_topic_count}/{subject.topic_count} topics ({subject.progress_percentage}%)

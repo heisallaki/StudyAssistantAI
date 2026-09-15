@@ -206,7 +206,7 @@ async function loadData() {
           {documents.map((doc) => (
             <Card key={doc.id}>
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'flex-start', gap: 2 }}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography
                       variant="h6"
