@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     ENVIRONMENT: str = "development"
     DATABASE_URL: str
+    TEST_DATABASE_URL: str | None = None
     JWT_SECRET_KEY: str
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.2:3b"
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = "ollama"
     AI_FALLBACK_PROVIDER: str | None = None
     GEMINI_API_KEY: str | None = None
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-3.6-flash"
     GEMINI_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
     GROQ_API_KEY: str | None = None
     GROQ_MODEL: str = "llama-3.3-70b-versatile"

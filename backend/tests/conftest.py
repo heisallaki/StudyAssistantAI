@@ -5,11 +5,13 @@ from app.core.config import get_settings
 
 
 def _resolve_test_database_url() -> str:
-    explicit = os.environ.get("TEST_DATABASE_URL")
+    settings = get_settings()
+
+    explicit = os.environ.get("TEST_DATABASE_URL") or settings.TEST_DATABASE_URL
     if explicit:
         return explicit
 
-    base_url = get_settings().DATABASE_URL
+    base_url = settings.DATABASE_URL
     if not base_url:
         raise RuntimeError(
             "DATABASE_URL is not set. Set DATABASE_URL in backend/.env (used to derive a "
