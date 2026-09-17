@@ -1,6 +1,5 @@
 import logging
 import uuid
-from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -17,16 +16,11 @@ from app.models.document import Document
 from app.repositories import document_repository, subject_repository
 from app.schemas.document import DocumentUpdate
 from app.services import document_indexing_service, document_processing
+from app.storage.base import StorageBackend
 
 logger = logging.getLogger(__name__)
 
 settings = get_settings()
-
-
-def _upload_dir() -> Path:
-    upload_path = Path(settings.UPLOAD_DIR)
-    upload_path.mkdir(parents=True, exist_ok=True)
-    return upload_path
 
 
 def list_documents(db: Session, user_id: uuid.UUID, subject_id: uuid.UUID | None = None) -> list[Document]:
@@ -43,6 +37,7 @@ def get_document(db: Session, document_id: uuid.UUID, user_id: uuid.UUID) -> Doc
 async def upload_document(
     db: Session,
     embedding_provider: EmbeddingProvider,
+    storage_backend: StorageBackend,
     user_id: uuid.UUID,
     original_filename: str,
     content_type: str,
@@ -61,8 +56,8 @@ async def upload_document(
         raise SubjectNotFoundError(subject_id)
 
     document_id = uuid.uuid4()
-    storage_path = _upload_dir() / f"{document_id}{extension}"
-    storage_path.write_bytes(file_bytes)
+    storage_key = f"{document_id}{extension}"
+    storage_reference = storage_backend.save(storage_key, file_bytes)
 
     extracted_text, processing_error = document_processing.extract_text(file_bytes, extension)
     processing_status = "processed" if extracted_text is not None else "failed"
@@ -72,7 +67,7 @@ async def upload_document(
         user_id=user_id,
         subject_id=subject_id,
         original_filename=original_filename,
-        storage_path=str(storage_path),
+        storage_path=storage_reference,
         content_type=content_type,
         file_size_bytes=len(file_bytes),
         extracted_text=extracted_text,
@@ -110,11 +105,15 @@ def update_document(db: Session, document_id: uuid.UUID, user_id: uuid.UUID, dat
     return document_repository.update(db, document, update_data)
 
 
-def delete_document(db: Session, document_id: uuid.UUID, user_id: uuid.UUID) -> None:
+def get_document_content(storage_backend: StorageBackend, document: Document) -> bytes:
+    return storage_backend.read(document.storage_path)
+
+
+def delete_document(db: Session, storage_backend: StorageBackend, document_id: uuid.UUID, user_id: uuid.UUID) -> None:
     document = get_document(db, document_id, user_id)
-    storage_path = Path(document.storage_path)
+    storage_reference = document.storage_path
     document_repository.delete(db, document)
     try:
-        storage_path.unlink(missing_ok=True)
-    except OSError as error:
-        logger.warning("Failed to remove document file %s: %s", storage_path, error)
+        storage_backend.delete(storage_reference)
+    except Exception as error:
+        logger.warning("Failed to remove document file %s: %s", storage_reference, error)

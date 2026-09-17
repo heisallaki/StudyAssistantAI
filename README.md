@@ -4,7 +4,7 @@ An AI-powered learning platform that helps students understand academic material
 
 ## Status
 
-🚧 In Development
+Live in production.
 
 ## Tech Stack
 
@@ -12,23 +12,35 @@ An AI-powered learning platform that helps students understand academic material
 
 **Backend:** Python, FastAPI, SQLAlchemy, Alembic, Pydantic, pytest
 
-**Database:** PostgreSQL
+**Database:** PostgreSQL with pgvector (Neon in production, local Postgres in development)
 
-**AI:** Ollama (local inference), integrated in a later phase
+**AI inference:** Ollama for local development; Google Gemini (with optional Groq fallback) in
+production, selected via the `AI_PROVIDER` / `AI_FALLBACK_PROVIDER` settings — no code changes
+required to switch
+
+**Embeddings:** a local ONNX model (`all-MiniLM-L6-v2`, 384 dimensions) runs in-process via
+`fastembed` for both development (the `ollama` embedding provider is also available) and
+production (`onnx`), so the vector schema never changes regardless of provider
+
+**File storage:** local disk in development; Supabase Storage in production, selected via
+`STORAGE_BACKEND`
 
 ## Project Structure
 
 StudyAssistantAI/
-├── backend/ FastAPI application, SQLAlchemy models, Alembic migrations
-├── frontend/ React + TypeScript client
+├── backend/ FastAPI application, SQLAlchemy models, Alembic migrations, Dockerfile
+├── frontend/ React + TypeScript client, deployed to Vercel
 └── docs/ Architecture and setup documentation
 
 ## Prerequisites
 
 - Python 3.12
 - Node.js 20+
-- PostgreSQL 16 (running locally)
+- PostgreSQL 16 (running locally, with the `vector` extension enabled)
 - Homebrew (macOS)
+- Ollama (for local AI inference and embeddings) — see https://ollama.com
+
+
 
 ## Backend Setup
 
@@ -68,10 +80,6 @@ cd backend
 source venv/bin/activate
 pytest
 ```
-
-## Roadmap
-
-Authentication, user profiles, dashboard, subjects, document management, AI tutor, RAG knowledge system, quiz generator and engine, flashcards, study planner, progress analytics, notifications, search, administration, security hardening, testing, performance, deployment, and the v1.0.0 release.
 
 ## License
 

@@ -7,27 +7,32 @@ from sqlalchemy.orm import Session
 
 from app.ai.providers.base import AIProvider
 from app.ai.providers.embedding_base import EmbeddingProvider
-from app.ai.providers.ollama_embedding_provider import OllamaEmbeddingProvider
-from app.ai.providers.ollama_provider import OllamaProvider
+from app.ai.providers.factory import build_ai_provider, build_embedding_provider
 from app.ai.service import AITutorService
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories import user_repository
+from app.storage.base import StorageBackend
+from app.storage.factory import build_storage_backend
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_ai_provider() -> AIProvider:
-    return OllamaProvider()
+    return build_ai_provider()
 
 
 def get_ai_tutor_service() -> AITutorService:
-    return AITutorService(OllamaProvider())
+    return AITutorService(build_ai_provider())
 
 
 def get_embedding_provider() -> EmbeddingProvider:
-    return OllamaEmbeddingProvider()
+    return build_embedding_provider()
+
+
+def get_storage_backend() -> StorageBackend:
+    return build_storage_backend()
 
 
 def get_current_user(

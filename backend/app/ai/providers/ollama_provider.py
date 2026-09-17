@@ -1,6 +1,6 @@
 import logging
 
-import httpx2
+import httpx
 
 from app.ai.providers.base import AIProvider, AIProviderError
 from app.core.config import get_settings
@@ -21,18 +21,18 @@ class OllamaProvider(AIProvider):
             payload["format"] = "json"
 
         try:
-            async with httpx2.AsyncClient(timeout=120.0) as client:
+            async with httpx.AsyncClient(timeout=120.0) as client:
                 response = await client.post(f"{self.base_url}/api/chat", json=payload)
                 response.raise_for_status()
-        except httpx2.ConnectError as error:
+        except httpx.ConnectError as error:
             logger.error("Could not connect to Ollama at %s: %s", self.base_url, error)
             raise AIProviderError(
                 "Could not reach the local AI model. Make sure Ollama is installed and running."
             ) from error
-        except httpx2.TimeoutException as error:
+        except httpx.TimeoutException as error:
             logger.error("Ollama request timed out: %s", error)
             raise AIProviderError("The AI model took too long to respond. Please try again.") from error
-        except httpx2.HTTPStatusError as error:
+        except httpx.HTTPStatusError as error:
             logger.error("Ollama returned an error status: %s", error)
             raise AIProviderError(
                 f"The AI model could not process this request. Is '{self.model}' pulled in Ollama?"

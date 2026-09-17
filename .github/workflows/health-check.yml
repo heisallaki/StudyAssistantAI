@@ -1,0 +1,22 @@
+name: Backend health check
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check backend health endpoint
+        run: |
+          response=$(curl -s -o /tmp/health_response.json -w "%{http_code}" "${BACKEND_URL}/api/v1/health")
+          echo "HTTP status: $response"
+          cat /tmp/health_response.json
+          if [ "$response" -ne 200 ]; then
+            echo "Backend health check failed with status $response"
+            exit 1
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}

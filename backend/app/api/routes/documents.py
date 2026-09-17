@@ -1,11 +1,10 @@
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.ai.providers.embedding_base import EmbeddingProvider
-from app.api.deps import get_current_user, get_embedding_provider
+from app.api.deps import get_current_user, get_embedding_provider, get_storage_backend
 from app.core.exceptions import (
     DocumentNotFoundError,
     FileTooLargeError,
@@ -17,6 +16,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.document import DocumentDetail, DocumentRead, DocumentUpdate
 from app.services import document_service
+from app.storage.base import StorageBackend, StorageError
 
 router = APIRouter()
 
@@ -37,6 +37,7 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
     embedding_provider: EmbeddingProvider = Depends(get_embedding_provider),
+    storage_backend: StorageBackend = Depends(get_storage_backend),
 ):
     if not file.filename:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="A file is required")
@@ -47,6 +48,7 @@ async def upload_document(
         return await document_service.upload_document(
             db,
             embedding_provider,
+            storage_backend,
             current_user.id,
             file.filename,
             file.content_type or "application/octet-stream",
@@ -99,9 +101,10 @@ def delete_document(
     document_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    storage_backend: StorageBackend = Depends(get_storage_backend),
 ):
     try:
-        document_service.delete_document(db, document_id, current_user.id)
+        document_service.delete_document(db, storage_backend, document_id, current_user.id)
     except DocumentNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
@@ -129,14 +132,23 @@ def download_document(
     document_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    storage_backend: StorageBackend = Depends(get_storage_backend),
 ):
     try:
         document = document_service.get_document(db, document_id, current_user.id)
     except DocumentNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    return FileResponse(
-        path=document.storage_path,
+    try:
+        content = document_service.get_document_content(storage_backend, document)
+    except StorageError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="This document's file could not be retrieved from storage",
+        )
+
+    return Response(
+        content=content,
         media_type=document.content_type,
-        filename=document.original_filename,
+        headers={"Content-Disposition": f'attachment; filename="{document.original_filename}"'},
     )
