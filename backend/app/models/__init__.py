@@ -1,0 +1,43 @@
+from app.models.admin_audit_log import AdminAuditLog
+from app.models.conversation import Conversation
+from app.models.deadline import Deadline
+from app.models.document import Document
+from app.models.document_chunk import DocumentChunk
+from app.models.flashcard import Flashcard
+from app.models.flashcard_deck import FlashcardDeck
+from app.models.flashcard_progress import FlashcardProgress
+from app.models.message import Message
+from app.models.notification import Notification
+from app.models.quiz import Quiz
+from app.models.quiz_attempt import QuizAttempt
+from app.models.quiz_attempt_answer import QuizAttemptAnswer
+from app.models.quiz_question import QuizQuestion
+from app.models.study_goal import StudyGoal
+from app.models.study_session import StudySession
+from app.models.subject import Subject
+from app.models.topic import Topic
+from app.models.user import User
+from app.models.user_profile import UserProfile
+
+__all__ = [
+    "User",
+    "UserProfile",
+    "Subject",
+    "Topic",
+    "Document",
+    "DocumentChunk",
+    "Conversation",
+    "Message",
+    "Quiz",
+    "QuizQuestion",
+    "QuizAttempt",
+    "QuizAttemptAnswer",
+    "FlashcardDeck",
+    "Flashcard",
+    "FlashcardProgress",
+    "StudyGoal",
+    "StudySession",
+    "Deadline",
+    "Notification",
+    "AdminAuditLog",
+]
