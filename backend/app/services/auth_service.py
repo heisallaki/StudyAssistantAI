@@ -7,14 +7,18 @@ from app.core.config import get_settings
 from app.core.exceptions import (
     AccountLockedError,
     EmailAlreadyRegisteredError,
+    EmailNotVerifiedError,
     InactiveUserError,
     InvalidCredentialsError,
+    InvalidCurrentPasswordError,
+    LastAdministratorError,
 )
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
-from app.repositories import user_repository
-from app.schemas.user import UserCreate, UserLogin
-from app.services import notification_service
+from app.repositories import admin_repository, user_repository
+from app.schemas.user import PasswordChangeRequest, UserCreate, UserLogin
+from app.services import notification_service, otp_service
+from app.services.email_service import EmailSendError
 
 settings = get_settings()
 security_logger = logging.getLogger("security")
@@ -28,7 +32,30 @@ def register_user(db: Session, user_in: UserCreate) -> User:
     hashed_password = hash_password(user_in.password)
     user = user_repository.create(db, user_in, hashed_password)
     notification_service.create_welcome_notification(db, user.id)
+
+    try:
+        otp_service.request_otp(db, user, otp_service.PURPOSE_EMAIL_VERIFICATION)
+    except EmailSendError as error:
+        security_logger.warning("Could not send verification email to %s: %s", user.email, error)
+
     return user
+
+
+def verify_email(db: Session, email: str, code: str) -> User:
+    user = user_repository.get_by_email(db, email)
+    if user is None:
+        raise InvalidCredentialsError(email)
+
+    otp_service.verify_otp(db, user, otp_service.PURPOSE_EMAIL_VERIFICATION, code)
+    user_repository.mark_email_verified(db, user)
+    return user
+
+
+def resend_verification_email(db: Session, email: str) -> None:
+    user = user_repository.get_by_email(db, email)
+    if user is None or user.is_email_verified:
+        return
+    otp_service.request_otp(db, user, otp_service.PURPOSE_EMAIL_VERIFICATION)
 
 
 def authenticate_user(db: Session, credentials: UserLogin) -> User:
@@ -53,6 +80,9 @@ def authenticate_user(db: Session, credentials: UserLogin) -> User:
         user_repository.update_login_state(db, user, failed_attempts, locked_until)
         raise InvalidCredentialsError(credentials.email)
 
+    if settings.EMAIL_VERIFICATION_REQUIRED and not user.is_email_verified:
+        raise EmailNotVerifiedError(credentials.email)
+
     if not user.is_active:
         raise InactiveUserError(credentials.email)
 
@@ -64,3 +94,32 @@ def authenticate_user(db: Session, credentials: UserLogin) -> User:
 
 def create_token_for_user(user: User) -> str:
     return create_access_token(subject=str(user.id))
+
+
+def request_password_change_otp(db: Session, user: User) -> None:
+    otp_service.request_otp(db, user, otp_service.PURPOSE_PASSWORD_CHANGE)
+
+
+def change_password(db: Session, user: User, data: PasswordChangeRequest) -> None:
+    if not verify_password(data.current_password, user.hashed_password):
+        raise InvalidCurrentPasswordError(user.email)
+
+    otp_service.verify_otp(db, user, otp_service.PURPOSE_PASSWORD_CHANGE, data.code)
+
+    new_hashed_password = hash_password(data.new_password)
+    user_repository.update_password(db, user, new_hashed_password)
+    security_logger.info("Password changed for user %s", user.email)
+
+
+def request_account_deletion_otp(db: Session, user: User) -> None:
+    otp_service.request_otp(db, user, otp_service.PURPOSE_ACCOUNT_DELETION)
+
+
+def delete_own_account(db: Session, user: User, code: str) -> None:
+    otp_service.verify_otp(db, user, otp_service.PURPOSE_ACCOUNT_DELETION, code)
+
+    if user.is_superuser and admin_repository.count_admins(db) <= 1:
+        raise LastAdministratorError(user.email)
+
+    security_logger.info("Account deleted by owner: %s", user.email)
+    user_repository.delete(db, user)

@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     ENVIRONMENT: str = "development"
     DATABASE_URL: str
-    TEST_DATABASE_URL: str | None = None
     JWT_SECRET_KEY: str
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.2:3b"
@@ -19,7 +18,7 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = "ollama"
     AI_FALLBACK_PROVIDER: str | None = None
     GEMINI_API_KEY: str | None = None
-    GEMINI_MODEL: str = "gemini-3.6-flash"
+    GEMINI_MODEL: str = "gemini-2.5-flash"
     GEMINI_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
     GROQ_API_KEY: str | None = None
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
@@ -43,6 +42,17 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_RECYCLE_SECONDS: int = 1800
+    EMAIL_VERIFICATION_REQUIRED: bool = True
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_FROM_EMAIL: str | None = None
+    SMTP_FROM_NAME: str = "StudyAssistant AI"
+    OTP_LENGTH: int = 6
+    OTP_EXPIRE_MINUTES: int = 10
+    OTP_MAX_ATTEMPTS: int = 5
+    OTP_REQUEST_RATE_LIMIT: str = "5/hour"
 
     @property
     def cors_origins_list(self) -> List[str]:

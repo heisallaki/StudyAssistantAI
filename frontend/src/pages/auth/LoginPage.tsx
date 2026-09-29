@@ -11,45 +11,55 @@ function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [needsVerification, setNeedsVerification] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault()
-  setError(null)
-  setIsSubmitting(true)
+    event.preventDefault()
+    setError(null)
+    setNeedsVerification(false)
+    setIsSubmitting(true)
 
-  try {
-    await login({ email, password })
-    navigate('/')
-  } catch (err) {
-    const axiosError = err as AxiosError<{ detail?: unknown }>
-    const detail = axiosError.response?.data?.detail
+    try {
+      await login({ email, password })
+      navigate('/')
+    } catch (err) {
+      const axiosError = err as AxiosError<{ detail?: unknown }>
+      const detail = axiosError.response?.data?.detail
 
-    if (typeof detail === 'string') {
-      setError(detail)
-    } else if (Array.isArray(detail)) {
-      setError(
-        detail
-          .map((item) => {
-            if (
-              typeof item === 'object' &&
-              item !== null &&
-              'msg' in item
-            ) {
-              return String((item as { msg: unknown }).msg)
-            }
+      if (
+        typeof detail === 'object' &&
+        detail !== null &&
+        'error' in detail &&
+        (detail as { error?: unknown }).error === 'email_not_verified'
+      ) {
+        setNeedsVerification(true)
+        setError((detail as { message?: string }).message ?? 'Please verify your email address before logging in.')
+      } else if (typeof detail === 'string') {
+        setError(detail)
+      } else if (Array.isArray(detail)) {
+        setError(
+          detail
+            .map((item) => {
+              if (
+                typeof item === 'object' &&
+                item !== null &&
+                'msg' in item
+              ) {
+                return String((item as { msg: unknown }).msg)
+              }
 
-            return String(item)
-          })
-          .join(', ')
-      )
-    } else {
-      setError('Unable to sign in. Please check your email and password.')
+              return String(item)
+            })
+            .join(', ')
+        )
+      } else {
+        setError('Unable to sign in. Please check your email and password.')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-  } finally {
-    setIsSubmitting(false)
   }
-}
 
   return (
     <Container maxWidth="xs">
@@ -62,6 +72,13 @@ function LoginPage() {
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
+                {needsVerification && (
+                  <Box sx={{ mt: 1 }}>
+                    <Link component={RouterLink} to={`/verify-email?email=${encodeURIComponent(email)}`}>
+                      Verify your email
+                    </Link>
+                  </Box>
+                )}
               </Alert>
             )}
             <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

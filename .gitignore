@@ -17,3 +17,6 @@ dist-ssr/
 htmlcov/
 coverage/
 uploads/
+# Native ML libraries
+libggml-*.so
+libggml-*.dylib

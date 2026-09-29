@@ -112,3 +112,27 @@ class CannotModifySelfError(AppError):
 
 class LastAdministratorError(AppError):
     pass
+
+
+class EmailNotVerifiedError(AppError):
+    pass
+
+
+class OtpNotFoundError(AppError):
+    pass
+
+
+class OtpExpiredError(AppError):
+    pass
+
+
+class OtpInvalidError(AppError):
+    pass
+
+
+class OtpTooManyAttemptsError(AppError):
+    pass
+
+
+class InvalidCurrentPasswordError(AppError):
+    pass

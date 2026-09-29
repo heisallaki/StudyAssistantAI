@@ -6,6 +6,7 @@ import ProtectedRoute from '../components/common/ProtectedRoute'
 import AppLayout from '../layouts/AppLayout'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
+import VerifyEmailPage from '../pages/auth/VerifyEmailPage'
 import DashboardPage from '../pages/dashboard/DashboardPage'
 
 const AdminAuditLogPage = lazy(() => import('../pages/admin/AdminAuditLogPage'))
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />

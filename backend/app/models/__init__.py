@@ -8,6 +8,7 @@ from app.models.flashcard_deck import FlashcardDeck
 from app.models.flashcard_progress import FlashcardProgress
 from app.models.message import Message
 from app.models.notification import Notification
+from app.models.otp_code import OtpCode
 from app.models.quiz import Quiz
 from app.models.quiz_attempt import QuizAttempt
 from app.models.quiz_attempt_answer import QuizAttemptAnswer
@@ -40,4 +41,5 @@ __all__ = [
     "Deadline",
     "Notification",
     "AdminAuditLog",
+    "OtpCode",
 ]

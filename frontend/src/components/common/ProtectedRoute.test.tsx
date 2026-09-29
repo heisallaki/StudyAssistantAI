@@ -59,6 +59,7 @@ describe('ProtectedRoute', () => {
         email: 'user@example.com',
         is_active: true,
         is_superuser: false,
+        is_email_verified: true,
         created_at: '2026-01-01T00:00:00Z',
       },
       isLoading: false,

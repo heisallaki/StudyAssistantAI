@@ -29,3 +29,18 @@ def update_login_state(
     user.failed_login_attempts = failed_login_attempts
     user.locked_until = locked_until
     db.commit()
+
+
+def mark_email_verified(db: Session, user: User) -> None:
+    user.is_email_verified = True
+    db.commit()
+
+
+def update_password(db: Session, user: User, hashed_password: str) -> None:
+    user.hashed_password = hashed_password
+    db.commit()
+
+
+def delete(db: Session, user: User) -> None:
+    db.delete(user)
+    db.commit()

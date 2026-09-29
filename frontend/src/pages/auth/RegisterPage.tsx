@@ -26,7 +26,7 @@ function RegisterPage() {
     setIsSubmitting(true)
     try {
       await register({ email, password })
-      navigate('/')
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`)
     } catch (err) {
       const axiosError = err as AxiosError<{ detail?: unknown }>
       const detail = axiosError.response?.data?.detail

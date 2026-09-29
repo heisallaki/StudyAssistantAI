@@ -37,7 +37,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   async function register(credentials: RegisterRequest) {
     await authService.register(credentials)
-    await login(credentials)
   }
 
   function logout() {

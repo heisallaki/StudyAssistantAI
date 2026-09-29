@@ -5,13 +5,11 @@ from app.core.config import get_settings
 
 
 def _resolve_test_database_url() -> str:
-    settings = get_settings()
-
-    explicit = os.environ.get("TEST_DATABASE_URL") or settings.TEST_DATABASE_URL
+    explicit = os.environ.get("TEST_DATABASE_URL")
     if explicit:
         return explicit
 
-    base_url = settings.DATABASE_URL
+    base_url = get_settings().DATABASE_URL
     if not base_url:
         raise RuntimeError(
             "DATABASE_URL is not set. Set DATABASE_URL in backend/.env (used to derive a "
@@ -41,6 +39,7 @@ if "test" not in _test_database_name.lower():
 
 os.environ["DATABASE_URL"] = _test_database_url
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+os.environ.setdefault("EMAIL_VERIFICATION_REQUIRED", "false")
 get_settings.cache_clear()
 
 import pytest
