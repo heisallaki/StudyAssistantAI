@@ -77,17 +77,23 @@ def register(
         ) from error
 
 
-@router.post("/verify-email", response_model=UserRead)
+@router.post("/verify-email", response_model=Token)
 def verify_email(
     data: EmailVerificationRequest,
     db: Session = Depends(get_db),
 ):
     try:
-        return auth_service.verify_email(db, data.email, data.code)
+        user = auth_service.verify_email(db, data.email, data.code)
     except InvalidCredentialsError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
     except (OtpNotFoundError, OtpExpiredError, OtpInvalidError, OtpTooManyAttemptsError) as error:
         _raise_for_otp_error(error)
+        return None
+
+    return Token(
+        access_token=auth_service.create_token_for_user(user),
+        token_type="bearer",
+    )
 
 
 @router.post("/resend-verification", response_model=MessageResponse)

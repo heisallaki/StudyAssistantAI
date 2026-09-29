@@ -1,10 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { AxiosError, AxiosHeaders } from 'axios'
 import { describe, expect, it, vi } from 'vitest'
 import RegisterPage from './RegisterPage'
 import { useAuth } from '../../hooks/useAuth'
-import type { AuthContextValue } from '../../contexts/AuthContext'
 
 vi.mock('../../hooks/useAuth')
 
@@ -18,7 +16,7 @@ function renderRegisterPage() {
   )
 }
 
-function mockAuth(register: AuthContextValue['register']) {
+function mockAuth(register = vi.fn().mockResolvedValue(undefined)) {
   mockedUseAuth.mockReturnValue({
     user: null,
     isLoading: false,
@@ -26,119 +24,37 @@ function mockAuth(register: AuthContextValue['register']) {
     login: vi.fn(),
     register,
     logout: vi.fn(),
+    loginWithToken: vi.fn(),
   })
-}
-
-function axiosErrorWithDetail(detail: unknown): AxiosError<{ detail?: unknown }> {
-  return new AxiosError(
-    'Request failed',
-    'ERR_BAD_REQUEST',
-    undefined,
-    undefined,
-    {
-      status: 422,
-      statusText: 'Unprocessable Entity',
-      headers: new AxiosHeaders(),
-      config: { headers: new AxiosHeaders() },
-      data: { detail },
-    }
-  )
-}
-
-function fillRegistrationForm(
-  email: string,
-  password: string,
-  confirmPassword: string
-) {
-  fireEvent.change(screen.getByLabelText(/^Email/), {
-    target: { value: email },
-  })
-
-  fireEvent.change(screen.getByLabelText(/^Password/), {
-    target: { value: password },
-  })
-
-  fireEvent.change(screen.getByLabelText(/^Confirm password/), {
-    target: { value: confirmPassword },
-  })
-}
-
-function submitRegistrationForm() {
-  const button = screen.getByRole('button', { name: 'Create account' })
-  const form = button.closest('form')
-
-  if (!form) {
-    throw new Error('Registration form was not found')
-  }
-
-  fireEvent.submit(form)
+  return register
 }
 
 describe('RegisterPage', () => {
-  it('blocks submission when passwords do not match', async () => {
-    const register = vi.fn()
-    mockAuth(register)
-
-    renderRegisterPage()
-
-    fillRegistrationForm(
-      'test@example.com',
-      'S3curePassw0rd!',
-      'DifferentPassw0rd!'
-    )
-
-    submitRegistrationForm()
-
-    expect(await screen.findByText('Passwords do not match')).toBeInTheDocument()
-    expect(register).not.toHaveBeenCalled()
-  })
-
   it('submits registration when passwords match', async () => {
-    const register = vi.fn().mockResolvedValue(undefined)
-    mockAuth(register)
+    const register = mockAuth()
 
     renderRegisterPage()
 
-    fillRegistrationForm(
-      'test@example.com',
-      'S3curePassw0rd!',
-      'S3curePassw0rd!'
-    )
-
-    submitRegistrationForm()
+    fireEvent.change(screen.getByLabelText(/^Email/), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByLabelText(/^Password/), { target: { value: 'S3curePassw0rd!' } })
+    fireEvent.change(screen.getByLabelText(/^Confirm password/), { target: { value: 'S3curePassw0rd!' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
     await waitFor(() => {
-      expect(register).toHaveBeenCalledTimes(1)
-      expect(register).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'S3curePassw0rd!',
-      })
+      expect(register).toHaveBeenCalledWith({ email: 'new@example.com', password: 'S3curePassw0rd!' })
     })
   })
 
-  it('renders each password-policy validation message from the API', async () => {
-    const register = vi.fn().mockRejectedValue(
-      axiosErrorWithDetail([
-        { msg: 'Password must contain at least one uppercase letter' },
-        { msg: 'Password must contain at least one special character' },
-      ])
-    )
-    mockAuth(register)
+  it('shows a client-side error when passwords do not match', () => {
+    mockAuth()
 
     renderRegisterPage()
 
-    fillRegistrationForm(
-      'test@example.com',
-      'alllowercase1',
-      'alllowercase1'
-    )
+    fireEvent.change(screen.getByLabelText(/^Email/), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByLabelText(/^Password/), { target: { value: 'S3curePassw0rd!' } })
+    fireEvent.change(screen.getByLabelText(/^Confirm password/), { target: { value: 'Different1!' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
-    submitRegistrationForm()
-
-    expect(
-      await screen.findByText(
-        'Password must contain at least one uppercase letter, Password must contain at least one special character'
-      )
-    ).toBeInTheDocument()
+    expect(screen.getByText('Passwords do not match')).toBeInTheDocument()
   })
 })

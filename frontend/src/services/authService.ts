@@ -23,8 +23,8 @@ export async function getCurrentUser(): Promise<AuthUser> {
   return response.data
 }
 
-export async function verifyEmail(data: EmailVerificationRequest): Promise<AuthUser> {
-  const response = await apiClient.post<AuthUser>('/auth/verify-email', data)
+export async function verifyEmail(data: EmailVerificationRequest): Promise<TokenResponse> {
+  const response = await apiClient.post<TokenResponse>('/auth/verify-email', data)
   return response.data
 }
 

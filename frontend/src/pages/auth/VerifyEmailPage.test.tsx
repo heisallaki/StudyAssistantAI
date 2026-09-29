@@ -5,17 +5,33 @@ import { AxiosError, AxiosHeaders } from 'axios'
 import { describe, expect, it, vi } from 'vitest'
 import VerifyEmailPage from './VerifyEmailPage'
 import * as authService from '../../services/authService'
+import { useAuth } from '../../hooks/useAuth'
 
 vi.mock('../../services/authService')
+vi.mock('../../hooks/useAuth')
 
 const mockedAuthService = vi.mocked(authService)
+const mockedUseAuth = vi.mocked(useAuth)
+
+function mockAuth(loginWithToken = vi.fn().mockResolvedValue(undefined)) {
+  mockedUseAuth.mockReturnValue({
+    user: null,
+    isLoading: false,
+    isAuthenticated: false,
+    login: vi.fn(),
+    loginWithToken,
+    register: vi.fn(),
+    logout: vi.fn(),
+  })
+  return loginWithToken
+}
 
 function renderVerifyEmailPage(initialPath = '/verify-email?email=student%40example.com') {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="/login" element={<div>Login page</div>} />
+        <Route path="/" element={<div>Dashboard page</div>} />
       </Routes>
     </MemoryRouter>
   )
@@ -33,18 +49,16 @@ function axiosErrorWithDetail(detail: unknown): AxiosError<{ detail?: unknown }>
 
 describe('VerifyEmailPage', () => {
   it('pre-fills the email from the query string', () => {
+    mockAuth()
     renderVerifyEmailPage()
     expect(screen.getByLabelText(/^Email/)).toHaveValue('student@example.com')
   })
 
-  it('submits the code and redirects to login on success', async () => {
+  it('submits the code, logs the user in, and redirects to the dashboard on success', async () => {
+    const loginWithToken = mockAuth()
     mockedAuthService.verifyEmail.mockResolvedValue({
-      id: '1',
-      email: 'student@example.com',
-      is_active: true,
-      is_superuser: false,
-      is_email_verified: true,
-      created_at: '2026-01-01T00:00:00Z',
+      access_token: 'issued-access-token',
+      token_type: 'bearer',
     })
     const user = userEvent.setup()
 
@@ -59,10 +73,14 @@ describe('VerifyEmailPage', () => {
         code: '123456',
       })
     })
-    expect(await screen.findByText('Login page')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(loginWithToken).toHaveBeenCalledWith('issued-access-token')
+    })
+    expect(await screen.findByText('Dashboard page')).toBeInTheDocument()
   })
 
   it('shows an error message when the code is incorrect', async () => {
+    mockAuth()
     mockedAuthService.verifyEmail.mockRejectedValue(axiosErrorWithDetail('Incorrect verification code.'))
     const user = userEvent.setup()
 
@@ -75,6 +93,7 @@ describe('VerifyEmailPage', () => {
   })
 
   it('resends the code and shows the confirmation message', async () => {
+    mockAuth()
     mockedAuthService.resendVerification.mockResolvedValue({
       message: 'If an account with that email exists, a verification code has been sent.',
     })
@@ -91,6 +110,7 @@ describe('VerifyEmailPage', () => {
   })
 
   it('only allows digits in the code field, capped at 6 characters', async () => {
+    mockAuth()
     const user = userEvent.setup()
     renderVerifyEmailPage()
 

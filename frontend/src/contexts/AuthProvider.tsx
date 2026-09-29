@@ -28,11 +28,19 @@ function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth()
   }, [isLoading])
 
-  async function login(credentials: LoginRequest) {
-    const tokenResponse = await authService.login(credentials)
-    localStorage.setItem(TOKEN_STORAGE_KEY, tokenResponse.access_token)
+  async function establishSession(accessToken: string) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, accessToken)
     const currentUser = await authService.getCurrentUser()
     setUser(currentUser)
+  }
+
+  async function login(credentials: LoginRequest) {
+    const tokenResponse = await authService.login(credentials)
+    await establishSession(tokenResponse.access_token)
+  }
+
+  async function loginWithToken(accessToken: string) {
+    await establishSession(accessToken)
   }
 
   async function register(credentials: RegisterRequest) {
@@ -51,6 +59,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: user !== null,
         login,
+        loginWithToken,
         register,
         logout,
       }}

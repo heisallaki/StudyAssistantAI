@@ -31,6 +31,7 @@ describe('AdminRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      loginWithToken: vi.fn(),
     })
 
     renderAdminRoute()
@@ -46,6 +47,7 @@ describe('AdminRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      loginWithToken: vi.fn(),
     })
 
     renderAdminRoute()
@@ -68,6 +70,7 @@ describe('AdminRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      loginWithToken: vi.fn(),
     })
 
     renderAdminRoute()
@@ -90,6 +93,7 @@ describe('AdminRoute', () => {
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
+      loginWithToken: vi.fn(),
     })
 
     renderAdminRoute()

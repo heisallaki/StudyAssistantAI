@@ -4,6 +4,7 @@ import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-d
 import { Alert, Box, Button, Card, CardContent, Container, Link, TextField, Typography } from '@mui/material'
 import type { AxiosError } from 'axios'
 import * as authService from '../../services/authService'
+import { useAuth } from '../../hooks/useAuth'
 
 function extractErrorMessage(err: unknown, fallback: string): string {
   const axiosError = err as AxiosError<{ detail?: unknown }>
@@ -30,6 +31,7 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { loginWithToken } = useAuth()
 
   const [email, setEmail] = useState(searchParams.get('email') ?? '')
   const [code, setCode] = useState('')
@@ -44,8 +46,9 @@ function VerifyEmailPage() {
     setInfoMessage(null)
     setIsVerifying(true)
     try {
-      await authService.verifyEmail({ email, code })
-      navigate('/login', { state: { verified: true } })
+      const tokenResponse = await authService.verifyEmail({ email, code })
+      await loginWithToken(tokenResponse.access_token)
+      navigate('/')
     } catch (err) {
       setError(extractErrorMessage(err, 'Unable to verify your email. Please try again.'))
     } finally {

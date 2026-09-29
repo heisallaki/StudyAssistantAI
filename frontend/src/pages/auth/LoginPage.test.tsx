@@ -26,6 +26,7 @@ function mockAuth(login: AuthContextValue['login']) {
     login,
     register: vi.fn(),
     logout: vi.fn(),
+    loginWithToken: vi.fn(),
   })
 }
 
