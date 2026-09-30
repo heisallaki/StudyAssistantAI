@@ -19,17 +19,20 @@ settings = get_settings()
 PURPOSE_EMAIL_VERIFICATION = "email_verification"
 PURPOSE_PASSWORD_CHANGE = "password_change"
 PURPOSE_ACCOUNT_DELETION = "account_deletion"
+PURPOSE_PASSWORD_RESET = "password_reset"
 
 _SUBJECTS = {
     PURPOSE_EMAIL_VERIFICATION: "Verify your StudyAssistant AI account",
     PURPOSE_PASSWORD_CHANGE: "Confirm your password change",
     PURPOSE_ACCOUNT_DELETION: "Confirm your account deletion",
+    PURPOSE_PASSWORD_RESET: "Reset your StudyAssistant AI password",
 }
 
 _INTROS = {
     PURPOSE_EMAIL_VERIFICATION: "Use this code to verify your email address and activate your account.",
     PURPOSE_PASSWORD_CHANGE: "Use this code to confirm you want to change your password.",
     PURPOSE_ACCOUNT_DELETION: "Use this code to confirm you want to permanently delete your account.",
+    PURPOSE_PASSWORD_RESET: "Use this code to reset your password.",
 }
 
 

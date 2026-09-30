@@ -16,7 +16,7 @@ from app.core.exceptions import (
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
 from app.repositories import admin_repository, user_repository
-from app.schemas.user import PasswordChangeRequest, UserCreate, UserLogin
+from app.schemas.user import PasswordChangeRequest, PasswordResetRequest, UserCreate, UserLogin
 from app.services import notification_service, otp_service
 from app.services.email_service import EmailSendError
 
@@ -123,3 +123,23 @@ def delete_own_account(db: Session, user: User, code: str) -> None:
 
     security_logger.info("Account deleted by owner: %s", user.email)
     user_repository.delete(db, user)
+
+
+def request_password_reset_otp(db: Session, email: str) -> None:
+    user = user_repository.get_by_email(db, email)
+    if user is None:
+        return
+    otp_service.request_otp(db, user, otp_service.PURPOSE_PASSWORD_RESET)
+
+
+def reset_password(db: Session, data: PasswordResetRequest) -> None:
+    user = user_repository.get_by_email(db, data.email)
+    if user is None:
+        raise InvalidCredentialsError(data.email)
+
+    otp_service.verify_otp(db, user, otp_service.PURPOSE_PASSWORD_RESET, data.code)
+
+    new_hashed_password = hash_password(data.new_password)
+    user_repository.update_password(db, user, new_hashed_password)
+    user_repository.update_login_state(db, user, 0, None)
+    security_logger.info("Password reset via forgot-password flow for user %s", user.email)

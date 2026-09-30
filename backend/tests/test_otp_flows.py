@@ -128,19 +128,210 @@ def test_change_password_flow(logged_in_user, monkeypatch):
     )
     assert otp_response.status_code == 200
 
-    response = client.post(
+    change_response = client.post(
         "/api/v1/auth/change-password",
-        headers=logged_in_user["headers"],
         json={
             "current_password": logged_in_user["password"],
-            "new_password": "N3wS3curePassw0rd!",
+            "new_password": "N3wSecurePassw0rd!",
             "code": "654321",
         },
+        headers=logged_in_user["headers"],
+    )
+    assert change_response.status_code == 200
+
+    old_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": logged_in_user["email"], "password": logged_in_user["password"]},
+    )
+    assert old_login.status_code == 401
+
+    new_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": logged_in_user["email"], "password": "N3wSecurePassw0rd!"},
+    )
+    assert new_login.status_code == 200
+
+
+def test_change_password_rejects_wrong_current_password(logged_in_user, monkeypatch):
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "654321")
+    client.post("/api/v1/auth/request-password-change-otp", headers=logged_in_user["headers"])
+
+    response = client.post(
+        "/api/v1/auth/change-password",
+        json={
+            "current_password": "totally-wrong-password",
+            "new_password": "N3wSecurePassw0rd!",
+            "code": "654321",
+        },
+        headers=logged_in_user["headers"],
+    )
+    assert response.status_code == 401
+
+
+def test_change_password_rejects_wrong_otp(logged_in_user, monkeypatch):
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "654321")
+    client.post("/api/v1/auth/request-password-change-otp", headers=logged_in_user["headers"])
+
+    response = client.post(
+        "/api/v1/auth/change-password",
+        json={
+            "current_password": logged_in_user["password"],
+            "new_password": "N3wSecurePassw0rd!",
+            "code": "000000",
+        },
+        headers=logged_in_user["headers"],
+    )
+    assert response.status_code == 400
+
+
+def test_delete_own_account_flow(logged_in_user, monkeypatch):
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "789012")
+    otp_response = client.post(
+        "/api/v1/auth/request-account-deletion-otp", headers=logged_in_user["headers"]
+    )
+    assert otp_response.status_code == 200
+
+    delete_response = client.request(
+        "DELETE",
+        "/api/v1/auth/me",
+        json={"code": "789012"},
+        headers=logged_in_user["headers"],
+    )
+    assert delete_response.status_code == 204
+
+    db = SessionLocal()
+    remaining = db.query(User).filter(User.email == logged_in_user["email"]).first()
+    db.close()
+    assert remaining is None
+
+
+def test_delete_own_account_rejects_wrong_otp(logged_in_user, monkeypatch):
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "789012")
+    client.post("/api/v1/auth/request-account-deletion-otp", headers=logged_in_user["headers"])
+
+    response = client.request(
+        "DELETE",
+        "/api/v1/auth/me",
+        json={"code": "000000"},
+        headers=logged_in_user["headers"],
+    )
+    assert response.status_code == 400
+
+
+def test_delete_own_account_blocks_last_administrator(logged_in_user, monkeypatch):
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == logged_in_user["email"]).first()
+    user.is_superuser = True
+    db.commit()
+    db.close()
+
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "789012")
+    client.post("/api/v1/auth/request-account-deletion-otp", headers=logged_in_user["headers"])
+
+    response = client.request(
+        "DELETE",
+        "/api/v1/auth/me",
+        json={"code": "789012"},
+        headers=logged_in_user["headers"],
+    )
+    assert response.status_code == 400
+
+
+def test_forgot_password_sends_reset_otp(verified_user, mock_email_sending):
+    response = client.post("/api/v1/auth/forgot-password", json={"email": verified_user["email"]})
+    assert response.status_code == 200
+    assert mock_email_sending.call_count == 2
+
+
+def test_forgot_password_is_silent_for_unknown_email(mock_email_sending):
+    response = client.post(
+        "/api/v1/auth/forgot-password", json={"email": f"{uuid.uuid4()}@example.com"}
     )
     assert response.status_code == 200
+    mock_email_sending.assert_not_called()
 
-    login_response = client.post(
-        "/api/v1/auth/login",
-        json={"email": logged_in_user["email"], "password": "N3wS3curePassw0rd!"},
+
+def test_reset_password_flow(verified_user, monkeypatch):
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "456789")
+    otp_response = client.post("/api/v1/auth/forgot-password", json={"email": verified_user["email"]})
+    assert otp_response.status_code == 200
+
+    reset_response = client.post(
+        "/api/v1/auth/reset-password",
+        json={
+            "email": verified_user["email"],
+            "code": "456789",
+            "new_password": "N3wSecurePassw0rd!",
+        },
     )
-    assert login_response.status_code == 200
+    assert reset_response.status_code == 200
+
+    old_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": verified_user["email"], "password": verified_user["password"]},
+    )
+    assert old_login.status_code == 401
+
+    new_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": verified_user["email"], "password": "N3wSecurePassw0rd!"},
+    )
+    assert new_login.status_code == 200
+
+
+def test_reset_password_rejects_wrong_otp(verified_user, monkeypatch):
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "456789")
+    client.post("/api/v1/auth/forgot-password", json={"email": verified_user["email"]})
+
+    response = client.post(
+        "/api/v1/auth/reset-password",
+        json={
+            "email": verified_user["email"],
+            "code": "000000",
+            "new_password": "N3wSecurePassw0rd!",
+        },
+    )
+    assert response.status_code == 400
+
+
+def test_reset_password_rejects_unknown_email():
+    response = client.post(
+        "/api/v1/auth/reset-password",
+        json={
+            "email": f"{uuid.uuid4()}@example.com",
+            "code": "456789",
+            "new_password": "N3wSecurePassw0rd!",
+        },
+    )
+    assert response.status_code == 404
+
+
+def test_reset_password_clears_account_lockout(verified_user, monkeypatch):
+    for _ in range(5):
+        client.post(
+            "/api/v1/auth/login",
+            json={"email": verified_user["email"], "password": "totally-wrong-password"},
+        )
+
+    locked_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": verified_user["email"], "password": verified_user["password"]},
+    )
+    assert locked_login.status_code == 423
+
+    monkeypatch.setattr(otp_service, "_generate_code", lambda: "456789")
+    client.post("/api/v1/auth/forgot-password", json={"email": verified_user["email"]})
+    client.post(
+        "/api/v1/auth/reset-password",
+        json={
+            "email": verified_user["email"],
+            "code": "456789",
+            "new_password": "N3wSecurePassw0rd!",
+        },
+    )
+
+    new_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": verified_user["email"], "password": "N3wSecurePassw0rd!"},
+    )
+    assert new_login.status_code == 200

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { Alert, Box, Button, Card, CardContent, Container, Link, TextField, Typography } from '@mui/material'
 import type { AxiosError } from 'axios'
 import { useAuth } from '../../hooks/useAuth'
@@ -8,11 +8,17 @@ import { useAuth } from '../../hooks/useAuth'
 function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [needsVerification, setNeedsVerification] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [passwordResetMessage] = useState<string | null>(() =>
+    (location.state as { passwordReset?: boolean } | null)?.passwordReset
+      ? 'Your password has been reset. Please sign in with your new password.'
+      : null
+  )
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -69,6 +75,11 @@ function LoginPage() {
             <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
               Sign in
             </Typography>
+            {passwordResetMessage && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {passwordResetMessage}
+              </Alert>
+            )}
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
@@ -98,6 +109,11 @@ function LoginPage() {
                 required
                 fullWidth
               />
+              <Box sx={{ textAlign: 'right' }}>
+                <Link component={RouterLink} to="/forgot-password" variant="body2">
+                  Forgot password?
+                </Link>
+              </Box>
               <Button type="submit" variant="contained" disabled={isSubmitting} fullWidth>
                 {isSubmitting ? 'Signing in...' : 'Sign in'}
               </Button>

@@ -1,7 +1,11 @@
 from functools import lru_cache
 from typing import List
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+VALID_AI_PROVIDERS = frozenset({"ollama", "gemini", "groq"})
+LOCAL_ONLY_AI_PROVIDERS = frozenset({"ollama"})
 
 
 class Settings(BaseSettings):
@@ -57,6 +61,40 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> List[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+
+    @property
+    def is_local_development(self) -> bool:
+        return self.ENVIRONMENT == "development"
+
+    @model_validator(mode="after")
+    def _validate_ai_provider_configuration(self) -> "Settings":
+        provider = self.AI_PROVIDER.strip().lower() if self.AI_PROVIDER else ""
+        if provider not in VALID_AI_PROVIDERS:
+            raise ValueError(
+                f"AI_PROVIDER must be one of {sorted(VALID_AI_PROVIDERS)}, got '{self.AI_PROVIDER}'"
+            )
+
+        fallback = self.AI_FALLBACK_PROVIDER.strip().lower() if self.AI_FALLBACK_PROVIDER else None
+        if fallback is not None and fallback not in VALID_AI_PROVIDERS:
+            raise ValueError(
+                "AI_FALLBACK_PROVIDER must be one of "
+                f"{sorted(VALID_AI_PROVIDERS)}, got '{self.AI_FALLBACK_PROVIDER}'"
+            )
+
+        if not self.is_local_development:
+            if provider in LOCAL_ONLY_AI_PROVIDERS:
+                raise ValueError(
+                    "AI_PROVIDER cannot be 'ollama' outside local development. Ollama is for local "
+                    "development only. Set AI_PROVIDER=gemini (with AI_FALLBACK_PROVIDER=groq) for "
+                    f"the '{self.ENVIRONMENT}' environment."
+                )
+            if fallback in LOCAL_ONLY_AI_PROVIDERS:
+                raise ValueError(
+                    "AI_FALLBACK_PROVIDER cannot be 'ollama' outside local development. Set "
+                    f"AI_FALLBACK_PROVIDER=groq for the '{self.ENVIRONMENT}' environment."
+                )
+
+        return self
 
 
 @lru_cache

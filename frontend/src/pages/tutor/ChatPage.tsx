@@ -71,7 +71,7 @@ function ChatPage() {
         current ? { ...current, messages: [...current.messages, assistantMessage] } : current,
       )
     } catch {
-      setSendError('The AI tutor is unavailable. Make sure Ollama is running locally, then try again.')
+      setSendError('The AI tutor is temporarily unavailable. Please try again shortly.')
     } finally {
       setIsSending(false)
     }

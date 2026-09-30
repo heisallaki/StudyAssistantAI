@@ -25,6 +25,7 @@ from app.schemas.user import (
     MessageResponse,
     OtpRequestByEmail,
     PasswordChangeRequest,
+    PasswordResetRequest,
     Token,
     UserCreate,
     UserLogin,
@@ -111,6 +112,37 @@ def resend_verification(
             detail="Could not send the verification email right now. Please try again shortly.",
         )
     return MessageResponse(message="If an account with that email exists, a verification code has been sent.")
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+@limiter.limit(settings.OTP_REQUEST_RATE_LIMIT)
+def forgot_password(
+    request: Request,
+    data: OtpRequestByEmail,
+    db: Session = Depends(get_db),
+):
+    try:
+        auth_service.request_password_reset_otp(db, data.email)
+    except EmailSendError:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not send the password reset email right now. Please try again shortly.",
+        )
+    return MessageResponse(message="If an account with that email exists, a password reset code has been sent.")
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+def reset_password(
+    data: PasswordResetRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        auth_service.reset_password(db, data)
+    except InvalidCredentialsError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    except (OtpNotFoundError, OtpExpiredError, OtpInvalidError, OtpTooManyAttemptsError) as error:
+        _raise_for_otp_error(error)
+    return MessageResponse(message="Your password has been reset. You can now sign in with your new password.")
 
 
 @router.post(

@@ -6,6 +6,7 @@ import type {
   MessageResponse,
   OtpRequestByEmail,
   PasswordChangeRequest,
+  PasswordResetRequest,
 } from '../types/otp'
 
 export async function login(credentials: LoginRequest): Promise<TokenResponse> {
@@ -50,4 +51,14 @@ export async function requestAccountDeletionOtp(): Promise<MessageResponse> {
 
 export async function deleteOwnAccount(data: AccountDeletionRequest): Promise<void> {
   await apiClient.delete('/auth/me', { data })
+}
+
+export async function forgotPassword(data: OtpRequestByEmail): Promise<MessageResponse> {
+  const response = await apiClient.post<MessageResponse>('/auth/forgot-password', data)
+  return response.data
+}
+
+export async function resetPassword(data: PasswordResetRequest): Promise<MessageResponse> {
+  const response = await apiClient.post<MessageResponse>('/auth/reset-password', data)
+  return response.data
 }

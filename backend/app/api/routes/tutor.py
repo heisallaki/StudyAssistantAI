@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -20,7 +21,11 @@ from app.schemas.conversation import (
 )
 from app.services import tutor_service
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+AI_TUTOR_UNAVAILABLE_MESSAGE = "The AI tutor is temporarily unavailable. Please try again shortly."
 
 
 @router.get("/conversations", response_model=list[ConversationRead])
@@ -97,4 +102,8 @@ async def send_message(
     except ConversationNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
     except AIProviderError as error:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(error))
+        logger.error("AI tutor provider failure for conversation %s: %s", conversation_id, error)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=AI_TUTOR_UNAVAILABLE_MESSAGE,
+        ) from error

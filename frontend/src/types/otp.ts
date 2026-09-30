@@ -20,3 +20,9 @@ export interface PasswordChangeRequest {
 export interface AccountDeletionRequest {
   code: string
 }
+
+export interface PasswordResetRequest {
+  email: string
+  code: string
+  new_password: string
+}
