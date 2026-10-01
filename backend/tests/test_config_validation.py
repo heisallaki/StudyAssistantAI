@@ -1,5 +1,4 @@
-import pytest
-from pydantic import ValidationError
+import logging
 
 from app.core.config import Settings
 
@@ -23,19 +22,38 @@ def test_development_allows_explicit_ollama():
     assert settings.AI_PROVIDER == "ollama"
 
 
-def test_production_rejects_missing_ai_provider_defaulting_to_ollama():
-    with pytest.raises(ValidationError, match="AI_PROVIDER cannot be 'ollama'"):
-        _build_settings(ENVIRONMENT="production")
+def test_production_never_fails_to_construct_with_missing_ai_provider():
+    settings = _build_settings(ENVIRONMENT="production")
+    assert settings.AI_PROVIDER == "ollama"
+    assert settings.is_local_development is False
 
 
-def test_production_rejects_explicit_ollama():
-    with pytest.raises(ValidationError, match="AI_PROVIDER cannot be 'ollama'"):
+def test_production_never_fails_to_construct_with_explicit_ollama():
+    settings = _build_settings(ENVIRONMENT="production", AI_PROVIDER="ollama")
+    assert settings.AI_PROVIDER == "ollama"
+
+
+def test_production_never_fails_to_construct_with_ollama_fallback():
+    settings = _build_settings(ENVIRONMENT="production", AI_PROVIDER="gemini", AI_FALLBACK_PROVIDER="ollama")
+    assert settings.AI_FALLBACK_PROVIDER == "ollama"
+
+
+def test_production_logs_a_warning_for_ollama_as_primary(caplog):
+    with caplog.at_level(logging.WARNING, logger="app.core.config"):
         _build_settings(ENVIRONMENT="production", AI_PROVIDER="ollama")
+    assert any("AI_PROVIDER is set to 'ollama'" in record.message for record in caplog.records)
 
 
-def test_production_rejects_ollama_fallback():
-    with pytest.raises(ValidationError, match="AI_FALLBACK_PROVIDER cannot be 'ollama'"):
+def test_production_logs_a_warning_for_ollama_as_fallback(caplog):
+    with caplog.at_level(logging.WARNING, logger="app.core.config"):
         _build_settings(ENVIRONMENT="production", AI_PROVIDER="gemini", AI_FALLBACK_PROVIDER="ollama")
+    assert any("AI_FALLBACK_PROVIDER is set to 'ollama'" in record.message for record in caplog.records)
+
+
+def test_development_does_not_log_a_warning(caplog):
+    with caplog.at_level(logging.WARNING, logger="app.core.config"):
+        _build_settings(ENVIRONMENT="development", AI_PROVIDER="ollama")
+    assert caplog.records == []
 
 
 def test_production_accepts_gemini_primary_with_groq_fallback():
@@ -51,22 +69,6 @@ def test_production_accepts_groq_primary_with_no_fallback():
     assert settings.AI_FALLBACK_PROVIDER is None
 
 
-def test_staging_environment_also_rejects_ollama():
-    with pytest.raises(ValidationError, match="AI_PROVIDER cannot be 'ollama'"):
-        _build_settings(ENVIRONMENT="staging", AI_PROVIDER="ollama")
-
-
-def test_rejects_unknown_ai_provider_name():
-    with pytest.raises(ValidationError, match="AI_PROVIDER must be one of"):
-        _build_settings(ENVIRONMENT="development", AI_PROVIDER="chatgpt")
-
-
-def test_rejects_unknown_ai_fallback_provider_name():
-    with pytest.raises(ValidationError, match="AI_FALLBACK_PROVIDER must be one of"):
-        _build_settings(ENVIRONMENT="production", AI_PROVIDER="gemini", AI_FALLBACK_PROVIDER="chatgpt")
-
-
-def test_provider_names_are_case_insensitive():
-    settings = _build_settings(ENVIRONMENT="production", AI_PROVIDER="Gemini", AI_FALLBACK_PROVIDER="GROQ")
-    assert settings.AI_PROVIDER == "Gemini"
-    assert settings.AI_FALLBACK_PROVIDER == "GROQ"
+def test_staging_environment_is_treated_as_non_development():
+    settings = _build_settings(ENVIRONMENT="staging", AI_PROVIDER="ollama")
+    assert settings.is_local_development is False

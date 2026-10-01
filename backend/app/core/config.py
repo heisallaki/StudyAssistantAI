@@ -1,8 +1,11 @@
+import logging
 from functools import lru_cache
 from typing import List
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
 
 VALID_AI_PROVIDERS = frozenset({"ollama", "gemini", "groq"})
 LOCAL_ONLY_AI_PROVIDERS = frozenset({"ollama"})
@@ -67,32 +70,26 @@ class Settings(BaseSettings):
         return self.ENVIRONMENT == "development"
 
     @model_validator(mode="after")
-    def _validate_ai_provider_configuration(self) -> "Settings":
+    def _warn_on_risky_ai_provider_configuration(self) -> "Settings":
+        if self.is_local_development:
+            return self
+
         provider = self.AI_PROVIDER.strip().lower() if self.AI_PROVIDER else ""
-        if provider not in VALID_AI_PROVIDERS:
-            raise ValueError(
-                f"AI_PROVIDER must be one of {sorted(VALID_AI_PROVIDERS)}, got '{self.AI_PROVIDER}'"
+        if provider in LOCAL_ONLY_AI_PROVIDERS:
+            logger.warning(
+                "AI_PROVIDER is set to 'ollama' in the '%s' environment. Ollama is for local "
+                "development only; AI features will refuse to use it and will report as "
+                "unavailable until AI_PROVIDER is set to 'gemini' or 'groq'.",
+                self.ENVIRONMENT,
             )
 
         fallback = self.AI_FALLBACK_PROVIDER.strip().lower() if self.AI_FALLBACK_PROVIDER else None
-        if fallback is not None and fallback not in VALID_AI_PROVIDERS:
-            raise ValueError(
-                "AI_FALLBACK_PROVIDER must be one of "
-                f"{sorted(VALID_AI_PROVIDERS)}, got '{self.AI_FALLBACK_PROVIDER}'"
+        if fallback in LOCAL_ONLY_AI_PROVIDERS:
+            logger.warning(
+                "AI_FALLBACK_PROVIDER is set to 'ollama' in the '%s' environment. Ollama is for "
+                "local development only and will not be used as a fallback here.",
+                self.ENVIRONMENT,
             )
-
-        if not self.is_local_development:
-            if provider in LOCAL_ONLY_AI_PROVIDERS:
-                raise ValueError(
-                    "AI_PROVIDER cannot be 'ollama' outside local development. Ollama is for local "
-                    "development only. Set AI_PROVIDER=gemini (with AI_FALLBACK_PROVIDER=groq) for "
-                    f"the '{self.ENVIRONMENT}' environment."
-                )
-            if fallback in LOCAL_ONLY_AI_PROVIDERS:
-                raise ValueError(
-                    "AI_FALLBACK_PROVIDER cannot be 'ollama' outside local development. Set "
-                    f"AI_FALLBACK_PROVIDER=groq for the '{self.ENVIRONMENT}' environment."
-                )
 
         return self
 

@@ -69,6 +69,40 @@ def test_build_ai_provider_rejects_unknown_provider(monkeypatch):
         factory.build_ai_provider()
 
 
+def test_build_ai_provider_rejects_ollama_outside_development(monkeypatch):
+    monkeypatch.setattr(factory.settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(factory.settings, "AI_PROVIDER", "ollama")
+    monkeypatch.setattr(factory.settings, "AI_FALLBACK_PROVIDER", None)
+    with pytest.raises(AIProviderError, match="local development only"):
+        factory.build_ai_provider()
+
+
+def test_build_ai_provider_rejects_ollama_fallback_outside_development(monkeypatch):
+    monkeypatch.setattr(factory.settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(factory.settings, "AI_PROVIDER", "gemini")
+    monkeypatch.setattr(factory.settings, "AI_FALLBACK_PROVIDER", "ollama")
+    with pytest.raises(AIProviderError, match="local development only"):
+        factory.build_ai_provider()
+
+
+def test_build_ai_provider_allows_gemini_with_groq_fallback_outside_development(monkeypatch):
+    monkeypatch.setattr(factory.settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(factory.settings, "AI_PROVIDER", "gemini")
+    monkeypatch.setattr(factory.settings, "AI_FALLBACK_PROVIDER", "groq")
+    provider = factory.build_ai_provider()
+    assert isinstance(provider, FallbackAIProvider)
+    assert isinstance(provider.primary, GeminiProvider)
+    assert isinstance(provider.fallback, GroqProvider)
+
+
+def test_build_ai_provider_allows_ollama_in_development(monkeypatch):
+    monkeypatch.setattr(factory.settings, "ENVIRONMENT", "development")
+    monkeypatch.setattr(factory.settings, "AI_PROVIDER", "ollama")
+    monkeypatch.setattr(factory.settings, "AI_FALLBACK_PROVIDER", None)
+    provider = factory.build_ai_provider()
+    assert isinstance(provider, OllamaProvider)
+
+
 def test_build_embedding_provider_defaults_to_ollama(monkeypatch):
     monkeypatch.setattr(factory.settings, "EMBEDDING_PROVIDER", "ollama")
     provider = factory.build_embedding_provider()
