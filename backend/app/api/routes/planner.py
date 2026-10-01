@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import date
 
@@ -30,7 +31,13 @@ from app.schemas.planner import (
 )
 from app.services import planner_service
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+PLANNER_RECOMMENDATIONS_UNAVAILABLE_MESSAGE = (
+    "Planner recommendations are temporarily unavailable. Please try again shortly."
+)
 
 
 @router.get("/goals", response_model=list[StudyGoalRead])
@@ -241,5 +248,9 @@ async def get_recommendations(
     try:
         recommendations = await planner_service.generate_recommendations(db, ai_provider, current_user.id)
     except PlannerRecommendationFailedError as error:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error))
+        logger.error("Planner recommendation failure for user %s: %s", current_user.id, error)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=PLANNER_RECOMMENDATIONS_UNAVAILABLE_MESSAGE,
+        ) from error
     return PlannerRecommendationResponse(recommendations=recommendations)

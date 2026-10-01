@@ -48,8 +48,13 @@ class GeminiProvider(AIProvider):
 
         url = f"{self.base_url}/models/{self.model}:generateContent"
 
+        timeout = httpx.Timeout(
+            settings.AI_REQUEST_TOTAL_TIMEOUT_SECONDS,
+            connect=settings.AI_REQUEST_CONNECT_TIMEOUT_SECONDS,
+        )
+
         try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
+            async with httpx.AsyncClient(timeout=timeout) as client:
                 response = await client.post(
                     url,
                     params={"key": self.api_key},

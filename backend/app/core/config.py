@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str | None = None
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    AI_REQUEST_CONNECT_TIMEOUT_SECONDS: float = 10.0
+    AI_REQUEST_TOTAL_TIMEOUT_SECONDS: float = 20.0
     EMBEDDING_PROVIDER: str = "ollama"
     EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
     EMBEDDING_CACHE_DIR: str = "/app/.fastembed_cache"

@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.ai.providers.base import AIProvider, AIProviderError
 from app.api.deps import get_ai_provider
+from app.api.routes.flashcard_decks import FLASHCARD_GENERATION_UNAVAILABLE_MESSAGE
 from app.db.session import SessionLocal
 from app.main import app
 from app.models.user import User
@@ -223,17 +224,20 @@ def test_generate_flashcards_creates_cards_from_ai_response(authenticated_user, 
     assert deck_after["card_count"] == 3
 
 
-def test_generate_flashcards_upstream_failure_returns_502(authenticated_user, failing_ai):
+def test_generate_flashcards_upstream_failure_returns_503(authenticated_user, failing_ai):
     deck = _create_deck(authenticated_user["headers"])
     response = client.post(
         f"/api/v1/decks/{deck['id']}/flashcards/generate",
         json={"count": 5},
         headers=authenticated_user["headers"],
     )
-    assert response.status_code == 502
+    assert response.status_code == 503
+    body = response.json()
+    assert body["detail"] == FLASHCARD_GENERATION_UNAVAILABLE_MESSAGE
+    assert "ollama" not in body["detail"].lower()
 
 
-def test_generate_flashcards_invalid_ai_response_returns_502(authenticated_user):
+def test_generate_flashcards_invalid_ai_response_returns_503(authenticated_user):
     app.dependency_overrides[get_ai_provider] = lambda: FakeAIProvider(response="not valid json")
     try:
         deck = _create_deck(authenticated_user["headers"])
@@ -242,7 +246,8 @@ def test_generate_flashcards_invalid_ai_response_returns_502(authenticated_user)
             json={"count": 5},
             headers=authenticated_user["headers"],
         )
-        assert response.status_code == 502
+        assert response.status_code == 503
+        assert response.json()["detail"] == FLASHCARD_GENERATION_UNAVAILABLE_MESSAGE
     finally:
         app.dependency_overrides.pop(get_ai_provider, None)
 

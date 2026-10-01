@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.ai.providers.base import AIProvider, AIProviderError
 from app.api.deps import get_ai_provider
+from app.api.routes.planner import PLANNER_RECOMMENDATIONS_UNAVAILABLE_MESSAGE
 from app.db.session import SessionLocal
 from app.main import app
 from app.models.user import User
@@ -333,16 +334,20 @@ def test_recommendations_success(authenticated_user, fake_ai):
     assert body["recommendations"][0]["subject"] == "Databases"
 
 
-def test_recommendations_upstream_failure_returns_502(authenticated_user, failing_ai):
+def test_recommendations_upstream_failure_returns_503(authenticated_user, failing_ai):
     response = client.post("/api/v1/planner/recommendations", headers=authenticated_user["headers"])
-    assert response.status_code == 502
+    assert response.status_code == 503
+    body = response.json()
+    assert body["detail"] == PLANNER_RECOMMENDATIONS_UNAVAILABLE_MESSAGE
+    assert "ollama" not in body["detail"].lower()
 
 
-def test_recommendations_invalid_ai_response_returns_502(authenticated_user):
+def test_recommendations_invalid_ai_response_returns_503(authenticated_user):
     app.dependency_overrides[get_ai_provider] = lambda: FakeAIProvider(response="not valid json")
     try:
         response = client.post("/api/v1/planner/recommendations", headers=authenticated_user["headers"])
-        assert response.status_code == 502
+        assert response.status_code == 503
+        assert response.json()["detail"] == PLANNER_RECOMMENDATIONS_UNAVAILABLE_MESSAGE
     finally:
         app.dependency_overrides.pop(get_ai_provider, None)
 

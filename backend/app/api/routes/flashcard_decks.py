@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,7 +28,13 @@ from app.schemas.flashcard import (
 )
 from app.services import flashcard_service
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+FLASHCARD_GENERATION_UNAVAILABLE_MESSAGE = (
+    "Flashcard generation is temporarily unavailable. Please try again shortly."
+)
 
 
 @router.get("", response_model=list[DeckRead])
@@ -119,7 +126,11 @@ async def generate_flashcards(
     except FlashcardDeckNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
     except FlashcardGenerationFailedError as error:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(error))
+        logger.error("Flashcard generation failure for deck %s: %s", deck_id, error)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=FLASHCARD_GENERATION_UNAVAILABLE_MESSAGE,
+        ) from error
 
 
 @router.put("/{deck_id}/flashcards/{flashcard_id}", response_model=FlashcardRead)
