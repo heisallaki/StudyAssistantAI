@@ -13,8 +13,10 @@ import {
   Typography,
 } from '@mui/material'
 import * as dashboardService from '../../services/dashboardService'
+import * as profileService from '../../services/profileService'
 import { useAuth } from '../../hooks/useAuth'
 import type { DashboardOverview } from '../../types/dashboard'
+import type { Profile } from '../../types/profile'
 
 const FIELD_LABELS: Record<string, string> = {
   full_name: 'Full name',
@@ -28,14 +30,16 @@ const FIELD_LABELS: Record<string, string> = {
 function DashboardPage() {
   const { user } = useAuth()
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const userDisplayName = (user as { full_name?: string } | null)?.full_name ?? 'there'
 
   useEffect(() => {
-    dashboardService
-      .getOverview()
-      .then((data) => setOverview(data))
+    Promise.all([dashboardService.getOverview(), profileService.getProfile()])
+      .then(([overviewData, profileData]) => {
+        setOverview(overviewData)
+        setProfile(profileData)
+      })
       .catch(() => setError('Unable to load your dashboard.'))
       .finally(() => setIsLoading(false))
   }, [])
@@ -53,7 +57,7 @@ function DashboardPage() {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-            Welcome back, {userDisplayName}
+            Welcome back, {profile?.full_name || user?.email || 'Student'}
           </Typography>
           {overview && (
             <Typography variant="body2" color="text.secondary">
