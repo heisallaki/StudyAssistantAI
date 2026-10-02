@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     EMBEDDING_PROVIDER: str = "ollama"
     EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
     EMBEDDING_CACHE_DIR: str = "/app/.fastembed_cache"
+    EMBEDDING_THREADS: int = 1
     STORAGE_BACKEND: str = "local"
     SUPABASE_URL: str | None = None
     SUPABASE_SERVICE_ROLE_KEY: str | None = None

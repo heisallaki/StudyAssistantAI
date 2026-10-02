@@ -12,10 +12,10 @@ _model = None
 _model_lock = asyncio.Lock()
 
 
-def _load_model(model_name: str, cache_dir: str):
+def _load_model(model_name: str, cache_dir: str, threads: int):
     from fastembed import TextEmbedding
 
-    return TextEmbedding(model_name=model_name, cache_dir=cache_dir)
+    return TextEmbedding(model_name=model_name, cache_dir=cache_dir, threads=threads)
 
 
 def _encode(model, texts: list[str]) -> list[list[float]]:
@@ -23,9 +23,15 @@ def _encode(model, texts: list[str]) -> list[list[float]]:
 
 
 class OnnxEmbeddingProvider(EmbeddingProvider):
-    def __init__(self, model_name: str | None = None, cache_dir: str | None = None):
+    def __init__(
+        self,
+        model_name: str | None = None,
+        cache_dir: str | None = None,
+        threads: int | None = None,
+    ):
         self.model_name = model_name or settings.EMBEDDING_MODEL_NAME
         self.cache_dir = cache_dir or settings.EMBEDDING_CACHE_DIR
+        self.threads = threads or settings.EMBEDDING_THREADS
 
     async def _get_model(self):
         global _model
@@ -33,7 +39,9 @@ class OnnxEmbeddingProvider(EmbeddingProvider):
             async with _model_lock:
                 if _model is None:
                     try:
-                        _model = await asyncio.to_thread(_load_model, self.model_name, self.cache_dir)
+                        _model = await asyncio.to_thread(
+                            _load_model, self.model_name, self.cache_dir, self.threads
+                        )
                     except Exception as error:
                         logger.error("Failed to load local embedding model %s: %s", self.model_name, error)
                         raise EmbeddingProviderError(
