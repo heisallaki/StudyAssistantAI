@@ -30,6 +30,7 @@ function DashboardPage() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const userDisplayName = (user as { full_name?: string } | null)?.full_name ?? 'there'
 
   useEffect(() => {
     dashboardService
@@ -52,7 +53,7 @@ function DashboardPage() {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 4 }}>
         <Box>
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-            Welcome back, {user?.email}
+            Welcome back, {userDisplayName}
           </Typography>
           {overview && (
             <Typography variant="body2" color="text.secondary">
