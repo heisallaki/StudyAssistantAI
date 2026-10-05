@@ -20,6 +20,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
 import * as tutorService from '../../services/tutorService'
 import type { ConversationDetail, ConversationMode, ExplanationLevel, Message } from '../../types/tutor'
+import ChatMarkdown from '../../components/common/ChatMarkdown'
 
 function ChatPage() {
   const { conversationId } = useParams<{ conversationId: string }>()
@@ -195,11 +196,10 @@ function ChatPage() {
                       p: 1.5,
                       bgcolor: message.role === 'user' ? 'primary.main' : 'background.default',
                       color: message.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                      maxWidth: '100%',
                     }}
                   >
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                      {message.content}
-                    </Typography>
+                    <ChatMarkdown content={message.content} />
                   </Paper>
                   {message.sources.length > 0 && (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

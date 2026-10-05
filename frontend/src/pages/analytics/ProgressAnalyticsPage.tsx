@@ -160,7 +160,13 @@ function ProgressAnalyticsPage() {
           </TextField>
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' }, gap: 2 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)', lg: 'repeat(5, 1fr)' },
+            gap: 2,
+          }}
+        >
           <StatCard label="Study time" value={formatMinutes(overview.total_study_minutes)} />
           <StatCard
             label="Quizzes taken"
@@ -170,8 +176,18 @@ function ProgressAnalyticsPage() {
             }
           />
           <StatCard
+            label="Total flashcards"
+            value={String(overview.total_flashcards)}
+            secondary={`${overview.total_flashcards_reviewed} review(s) logged`}
+          />
+          <StatCard
             label="Flashcards mastered"
-            value={`${overview.flashcards_mastered}/${overview.total_flashcards}`}
+            value={String(overview.flashcards_mastered)}
+            secondary={
+              overview.total_flashcards > 0
+                ? `${Math.round((overview.flashcards_mastered / overview.total_flashcards) * 100)}% of ${overview.total_flashcards}`
+                : 'No flashcards yet'
+            }
           />
           <StatCard
             label="Subjects"
