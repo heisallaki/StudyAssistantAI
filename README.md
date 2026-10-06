@@ -1,3 +1,5 @@
+![Study Assistant AI preview](.github/preview.png)
+
 # StudyAssistant AI
 
 An AI-powered learning platform that helps students understand academic material, generate practice content, organize study sessions, and track academic progress.

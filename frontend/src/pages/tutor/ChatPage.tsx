@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Alert,
   Avatar,
@@ -11,11 +11,16 @@ import {
   Chip,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   MenuItem,
   Paper,
   TextField,
   Typography,
 } from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
 import PersonIcon from '@mui/icons-material/Person'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
 import * as tutorService from '../../services/tutorService'
@@ -24,6 +29,7 @@ import ChatMarkdown from '../../components/common/ChatMarkdown'
 
 function ChatPage() {
   const { conversationId } = useParams<{ conversationId: string }>()
+  const navigate = useNavigate()
 
   const [conversation, setConversation] = useState<ConversationDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -32,6 +38,10 @@ function ChatPage() {
   const [draft, setDraft] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
@@ -85,6 +95,19 @@ function ChatPage() {
       explanation_level: explanationLevel,
     })
     setConversation({ ...conversation, mode: updated.mode, explanation_level: updated.explanation_level })
+  }
+
+  async function handleDeleteConversation() {
+    if (!conversationId) return
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      await tutorService.deleteConversation(conversationId)
+      navigate('/tutor')
+    } catch {
+      setDeleteError('Unable to delete this conversation. Please try again.')
+      setIsDeleting(false)
+    }
   }
 
   if (isLoading) {
@@ -152,6 +175,14 @@ function ChatPage() {
               <MenuItem value="tutor">Direct</MenuItem>
               <MenuItem value="socratic">Socratic</MenuItem>
             </TextField>
+            <Button
+              size="small"
+              color="error"
+              startIcon={<DeleteIcon fontSize="small" />}
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              Delete
+            </Button>
           </Box>
         </Box>
 
@@ -243,6 +274,24 @@ function ChatPage() {
           </Button>
         </Box>
       </Box>
+
+      <Dialog open={isDeleteDialogOpen} onClose={() => !isDeleting && setIsDeleteDialogOpen(false)}>
+        <DialogTitle>Delete "{conversation.title}"?</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {deleteError && <Alert severity="error">{deleteError}</Alert>}
+          <Typography variant="body2">
+            This will permanently delete this conversation and all of its messages. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
+            Cancel
+          </Button>
+          <Button color="error" variant="contained" onClick={handleDeleteConversation} disabled={isDeleting}>
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   )
 }
