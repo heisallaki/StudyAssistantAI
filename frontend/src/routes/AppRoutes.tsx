@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 import AdminRoute from '../components/common/AdminRoute'
 import ProtectedRoute from '../components/common/ProtectedRoute'
+import RouteSeo from '../components/common/RouteSeo'
 import AppLayout from '../layouts/AppLayout'
 import LoginPage from '../pages/auth/LoginPage'
 import RegisterPage from '../pages/auth/RegisterPage'
@@ -14,6 +15,7 @@ const AdminAuditLogPage = lazy(() => import('../pages/admin/AdminAuditLogPage'))
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 const AdminUsersPage = lazy(() => import('../pages/admin/AdminUsersPage'))
 const ProgressAnalyticsPage = lazy(() => import('../pages/analytics/ProgressAnalyticsPage'))
+const LegalPage = lazy(() => import('../pages/legal/LegalPage'))
 const DocumentDetailPage = lazy(() => import('../pages/documents/DocumentDetailPage'))
 const DocumentsPage = lazy(() => import('../pages/documents/DocumentsPage'))
 const DeckDetailPage = lazy(() => import('../pages/flashcards/DeckDetailPage'))
@@ -43,11 +45,15 @@ function RouteLoadingFallback() {
 function AppRoutes() {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
+      <RouteSeo />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/privacy" element={<LegalPage documentKey="privacy" />} />
+        <Route path="/terms" element={<LegalPage documentKey="terms" />} />
+        <Route path="/disclaimer" element={<LegalPage documentKey="disclaimer" />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />

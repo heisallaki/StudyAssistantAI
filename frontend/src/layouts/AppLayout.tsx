@@ -24,6 +24,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications'
 import SearchIcon from '@mui/icons-material/Search'
 import { useAuth } from '../hooks/useAuth'
 import * as notificationService from '../services/notificationService'
+import PolicyLinks from '../components/common/PolicyLinks'
 import ThemeSettingsMenu from '../components/common/ThemeSettingsMenu'
 import { getAccentGradient, getGlassBackground, getGlassShadow } from '../theme/theme'
 
@@ -245,6 +246,10 @@ function AppLayout() {
               <ListItemText primary="Log out" />
             </ListItemButton>
           </List>
+          <Divider />
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <PolicyLinks align="left" />
+          </Box>
         </Box>
       </Drawer>
 

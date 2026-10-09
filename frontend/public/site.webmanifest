@@ -1,6 +1,12 @@
 {
   "name": "StudyAssistant AI",
   "short_name": "StudyAssistant AI",
+  "description": "An AI study companion: chat with a tutor about your notes, generate quizzes and flashcards, and plan your study time.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

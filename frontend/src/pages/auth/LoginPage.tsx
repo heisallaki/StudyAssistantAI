@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { Alert, Box, Button, Card, CardContent, Container, Link, TextField, Typography } from '@mui/material'
 import type { AxiosError } from 'axios'
+import PolicyLinks from '../../components/common/PolicyLinks'
 import { useAuth } from '../../hooks/useAuth'
 
 function LoginPage() {
@@ -121,6 +122,9 @@ function LoginPage() {
             <Typography variant="body2" sx={{ mt: 2 }}>
               Don't have an account? <Link component={RouterLink} to="/register">Create one</Link>
             </Typography>
+            <Box sx={{ mt: 2 }}>
+              <PolicyLinks />
+            </Box>
           </CardContent>
         </Card>
       </Box>

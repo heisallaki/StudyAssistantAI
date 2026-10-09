@@ -1,4 +1,14 @@
 {
+  "headers": [
+    {
+      "source": "/:section(subjects|documents|tutor|quizzes|flashcards|planner|analytics|notifications|search|profile|admin|verify-email|forgot-password)",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/:section(subjects|documents|tutor|quizzes|flashcards|planner|analytics|notifications|search|profile|admin)/:rest*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { Alert, Box, Button, Card, CardContent, Container, Link, TextField, Typography } from '@mui/material'
 import type { AxiosError } from 'axios'
+import PolicyLinks from '../../components/common/PolicyLinks'
 import { useAuth } from '../../hooks/useAuth'
 
 function RegisterPage() {
@@ -92,6 +93,10 @@ function RegisterPage() {
                 required
                 fullWidth
               />
+              <Typography variant="caption" color="text.secondary">
+                By creating an account you agree to the <Link component={RouterLink} to="/terms">Terms of Use</Link> and
+                the <Link component={RouterLink} to="/privacy">Privacy Policy</Link>.
+              </Typography>
               <Button type="submit" variant="contained" disabled={isSubmitting} fullWidth>
                 {isSubmitting ? 'Creating account...' : 'Create account'}
               </Button>
@@ -99,6 +104,9 @@ function RegisterPage() {
             <Typography variant="body2" sx={{ mt: 2 }}>
               Already have an account? <Link component={RouterLink} to="/login">Sign in</Link>
             </Typography>
+            <Box sx={{ mt: 2 }}>
+              <PolicyLinks />
+            </Box>
           </CardContent>
         </Card>
       </Box>
